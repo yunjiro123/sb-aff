@@ -1,0 +1,345 @@
+@use '../../styles/tokens' as *;
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: $space-xxl * 1.2;
+  margin: 0;
+  padding: $space-xl * 2.4 0 $space-xl * 1.2;
+  border-radius: 0;
+
+  // Ambient section glow, biased toward .visual rather than dead-center.
+  // Forced to zero at y=0 via mask so it can't leave any seam against the navbar above.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    background: radial-gradient(
+      850px 600px at 76% 42%,
+      rgba(72, 145, 255, 0.14),
+      rgba(121, 73, 255, 0.07) 45%,
+      transparent 72%
+    );
+    mask-image: linear-gradient(to bottom, transparent, black 60px);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 60px);
+    pointer-events: none;
+  }
+}
+
+.visual {
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+  width: 792px;
+  // Matches .blob's height so .row/.hero size to contain it (.blob is absolute).
+  height: 690px;
+
+  // Spotlight glow centered on the blob; inset controls spread since size is closest-side.
+  // Top inset kept small (well under .hero's 154px top padding) so the glow's box
+  // stays inside .hero and can't get hard-clipped by its overflow:hidden.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -40px -180px -180px -180px;
+    z-index: -2;
+    background: radial-gradient(
+      closest-side,
+      rgba(72, 145, 255, 0.55),
+      rgba(121, 73, 255, 0.3) 40%,
+      transparent 75%
+    );
+    pointer-events: none;
+  }
+}
+
+.blob {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  left: 0;
+  width: 792px;
+  // Height/clip-path scaled 1.25x taller from the base shape; width untouched.
+  height: 690px;
+  clip-path: path(
+    'M396,37.5 C474.8,34.4 586.6,47.9 641.8,90.6 C697,133.4 714.5,225 727.2,294.3 C739.9,363.6 753.4,450.8 718,506.4 C682.4,562 590.5,602.1 514.7,628.3 C438.8,654.3 330.6,686 262.8,662.9 C195,639.8 145.4,551.8 107.9,489.6 C70.2,427.4 26.8,353.4 37,290 C47,226.6 108.6,151.5 168.5,109.5 C228.2,67.4 317.2,40.6 396,37.5 Z'
+  );
+  background:
+    radial-gradient(120% 120% at 25% 18%, rgba(255, 255, 255, 0.35), transparent 45%),
+    $gradient-blue;
+  filter: brightness(0.85) drop-shadow(0 24px 54px rgba(0, 0, 0, 0.35));
+}
+
+// Scattered accent circles/oblongs in the blob's top-left and bottom-right
+// corners. TL sits behind the blob (z-index -1, same back layer as
+// .coinCanvasBack); BR sits in front of it (z-index 1, same layer as
+// .imageBody) so the cluster reads as overlapping the portrait's edge. Each
+// fill is $gradient-blue's own two stops (#4891ff/#7949ff) mixed at a
+// different point, rather than one flat color repeated across all five.
+.decorTL1 {
+  position: absolute;
+  z-index: -1;
+  top: -2px;
+  left: -2px;
+  width: 100px;
+  height: 70px;
+  border-radius: 50%;
+  transform: rotate(-12deg);
+  background: color-mix(in srgb, #4891ff 90%, #7949ff 10%);
+}
+
+.decorTL2 {
+  position: absolute;
+  z-index: -1;
+  top: 70px;
+  left: 69px;
+  width: 78px;
+  height: 46px;
+  border-radius: 50%;
+  transform: rotate(24deg);
+  background: color-mix(in srgb, #4891ff 10%, #7949ff 90%);
+}
+
+.decorBR1 {
+  position: absolute;
+  z-index: 1;
+  bottom: 10px;
+  right: -20px;
+  width: 100px;
+  height: 72px;
+  border-radius: 50%;
+  transform: rotate(14deg);
+  background: color-mix(in srgb, #4891ff 25%, #7949ff 75%);
+}
+
+.decorBR2 {
+  position: absolute;
+  z-index: 1;
+  bottom: 41px;
+  right: 95px;
+  width: 90px;
+  height: 48px;
+  border-radius: 50%;
+  transform: rotate(-18deg);
+  background: color-mix(in srgb, #4891ff 75%, #7949ff 25%);
+}
+
+.decorBR3 {
+  position: absolute;
+  z-index: 1;
+  bottom: 120px;
+  right: 10px;
+  width: 46px;
+  height: 28px;
+  border-radius: 50%;
+  transform: rotate(-22deg);
+  background: color-mix(in srgb, #4891ff 50%, #7949ff 50%);
+}
+
+// Two canvases (behind/in front of the portrait) — see Coins3D.jsx. Padding must match its MARGIN.
+.coinCanvasBack,
+.coinCanvasFront {
+  position: absolute;
+  top: -225px;
+  left: -225px;
+  width: 1242px;
+  height: 1140px;
+  pointer-events: none;
+}
+
+.coinCanvasBack {
+  z-index: -1;
+}
+
+.coinCanvasFront {
+  z-index: 2;
+}
+
+// Reveals just the sliver of hair poking out above the blob.
+.imageOverhang {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  width: 792px;
+  height: 690px;
+  clip-path: inset(-20% 0 300px 0);
+}
+
+// Shows everything from the blob's top edge down.
+.imageBody {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  width: 792px;
+  height: 690px;
+  clip-path: path(
+    'M396,37.5 C474.8,34.4 586.6,47.9 641.8,90.6 C697,133.4 714.5,225 727.2,294.3 C739.9,363.6 753.4,450.8 718,506.4 C682.4,562 590.5,602.1 514.7,628.3 C438.8,654.3 330.6,686 262.8,662.9 C195,639.8 145.4,551.8 107.9,489.6 C70.2,427.4 26.8,353.4 37,290 C47,226.6 108.6,151.5 168.5,109.5 C228.2,67.4 317.2,40.6 396,37.5 Z'
+  );
+}
+
+.heroImg {
+  position: absolute;
+  top: -15%;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 936px;
+  width: auto;
+}
+
+.row {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-xs * 1.2;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: $space-sm * 1.2;
+}
+
+.headline {
+  font-family: $font-display;
+  font-size: $hero-size;
+  font-weight: $hero-weight;
+  line-height: $hero-line-height;
+  letter-spacing: $hero-letter-spacing;
+  color: $color-white;
+  margin: 0;
+  // Inherited, so it also lands on .accent's gradient-clipped text below.
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+}
+
+.accent {
+  display: inline-block;
+  padding: 0 15px;
+  border-radius: 10px;
+  background: $gradient-blue;
+  color: $color-white;
+  line-height:1;
+}
+
+.subhead {
+  font-size: 23px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 504px;
+  margin-top: $space-xs * 1.2;
+}
+
+.ctaRow {
+  display: flex;
+  align-items: center;
+  gap: $space-lg * 1.2;
+  margin-top: $space-xs * 1.2;
+}
+
+.cta {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  padding: 19px 38px;
+  border-radius: $radius-pill * 1.2;
+  background: $gradient-blue;
+  color: $color-white;
+  font-weight: 700;
+  font-size: 20px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.3);
+  transition: transform $duration-hover $ease-standard, box-shadow $duration-hover $ease-standard;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 17px 38px rgba(72, 145, 255, 0.45);
+    color: $color-white;
+  }
+}
+
+.learnMore {
+  display: flex;
+  align-items: center;
+  gap: $space-xs * 1.2;
+  font-weight: 700;
+  font-size: 20px;
+  color: $color-white;
+
+  &:hover {
+    color: $color-white;
+
+    .arrow {
+      transform: translateX(4px);
+    }
+  }
+}
+
+.arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform $duration-hover $ease-standard;
+
+  svg {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+// Horizontal counterpart to .statItem's vertical divider.
+.contentDivider {
+  width: 100%;
+  height: 1px;
+  margin-top: $space-m * 1.2;
+  background: $color-white;
+}
+
+.statsGroup {
+  display: flex;
+  align-items: center;
+  gap: $space-lg * 1.2;
+  margin-top: $space-m * 1.2;
+}
+
+.statItem {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+
+  &:not(:first-child) {
+    padding-left: $space-xl * 1.2;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 1px;
+      height: 100%;
+      background: linear-gradient(180deg, #4891ff, #7949ff);
+    }
+  }
+}
+
+.statLabel {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: $color-light-grey-1;
+}
+
+.statValue {
+  font-family: $font-display;
+  font-size: 36px;
+  font-weight: 700;
+  color: $color-white;
+}
+

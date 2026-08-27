@@ -1,0 +1,54 @@
+// Design tokens — mirrors DESIGN.md. Keep the two in sync.
+
+// Color (SCSS aliases onto the CSS custom properties defined in global.scss,
+// so components can use either $color-orange-1 or var(--orange-1)).
+$color-background: var(--background);
+$color-grey-1: var(--grey-1);
+$color-grey-2: var(--grey-2);
+$color-grey-3: var(--grey-3);
+$color-grey-4: var(--grey-4);
+$color-light-grey-1: var(--light-grey-1);
+$color-blue-1: var(--blue-1);
+$color-blue-2: var(--blue-2);
+$color-black-1: var(--black-1);
+$color-black-2: var(--black-2);
+$color-orange-1: var(--orange-1);
+$color-orange-2: var(--orange-2);
+$color-violet-1: var(--violet-1);
+$color-white: var(--white);
+$gradient-blue: var(--blue-gradient);
+$gradient-orange: var(--orange-gradient);
+
+// Typography
+$font-display: 'Plus Jakarta Sans', system-ui, sans-serif;
+$font-body: 'DM Sans', system-ui, sans-serif;
+
+// Hero H1 — sized for the banner-style hero (narrower text column next to
+// the brand photo), not the earlier full-width treatment.
+$hero-size: 86.4px;
+$hero-weight: 700;
+$hero-line-height: 1.2;
+$hero-letter-spacing: -0.02em;
+
+// Site content width — sections span full width (edge-to-edge), but the
+// content inside each section is centered within this narrower rail.
+// Matches Wise's reference container width. See DESIGN.md.
+$site-max-width: 1600px;
+
+// Spacing (8px grid)
+$space-xs: 8px;
+$space-sm: 16px;
+$space-m: 24px;
+$space-lg: 32px;
+$space-xl: 48px;
+$space-xxl: 64px;
+$space-xxxl: 96px;
+
+// Shape
+$radius-card: 20px;
+$radius-button: 12px;
+$radius-pill: 999px;
+
+// Motion
+$ease-standard: ease;
+$duration-hover: 0.2s;

@@ -1,0 +1,68 @@
+@use './tokens' as *;
+
+:root {
+  --background: #1d2126;
+  --grey-1: #313539;
+  --grey-2: #25282c;
+  --grey-3: #0e1114;
+  --grey-4: #3e4651;
+  --light-grey-1: #b8b9bb;
+  --blue-1: #111725;
+  --blue-2: #0e8aeb;
+  --black-1: #13171c;
+  --black-2: #13161a;
+  --orange-1: #ff9a01;
+  --orange-2: #ffcb12;
+  --violet-1: #db47dd;
+  --white: #fff;
+  --blue-gradient: linear-gradient(90deg, #4891ff, #7949ff);
+  --orange-gradient: linear-gradient(94.89deg, #ff6d00, #ff9e00);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: $color-background;
+  color: $color-white;
+  font-family: $font-body;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+h1,
+h2,
+h3 {
+  font-family: $font-display;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: $color-white;
+  text-decoration: none;
+
+  &:hover {
+    color: $color-blue-2;
+  }
+}
+
+button {
+  font-family: $font-body;
+  border: none;
+  background: none;
+  cursor: pointer;
+}

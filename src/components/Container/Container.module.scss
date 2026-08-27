@@ -1,0 +1,8 @@
+@use '../../styles/tokens' as *;
+
+.container {
+  width: 100%;
+  max-width: $site-max-width;
+  margin: 0 auto;
+  box-sizing: border-box;
+}

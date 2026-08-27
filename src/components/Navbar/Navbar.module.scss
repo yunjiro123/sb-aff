@@ -1,0 +1,75 @@
+@use '../../styles/tokens' as *;
+
+// No background of its own, blending into .hero. Absolute (anchored to
+// .app's position: relative) so it overlays the top of .hero instead of
+// pushing it down as an in-flow sibling.
+.navbar {
+  position: relative;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-m;
+  padding: $space-xs 0;
+}
+
+.logo {
+  height: 50px;
+  width: auto;
+}
+
+.links {
+  display: flex;
+  align-items: center;
+  gap: $space-m;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  a {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 14px;
+    font-weight: 500;
+
+    &:hover {
+      color: $color-white;
+    }
+  }
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: $space-xs;
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 20px;
+  border-radius: $radius-pill;
+  color: $color-white;
+  font-weight: 700;
+  font-size: 13px;
+  transition: transform $duration-hover $ease-standard;
+
+  &:hover {
+    transform: translateY(-1px);
+    color: $color-white;
+  }
+}
+
+.login {
+  background: $gradient-orange;
+}
+
+.signup {
+  background: $gradient-blue;
+}
