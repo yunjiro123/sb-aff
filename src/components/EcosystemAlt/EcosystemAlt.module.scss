@@ -1,0 +1,224 @@
+@use 'sass:math';
+@use '../../styles/tokens' as *;
+
+$card-width: 260px;
+$card-height: 364px;
+$card-reveal: 220px;
+$hand-height: 300px;
+
+$slot-width: 420px;
+$slot-height: 500px;
+
+$card-fly-height: $slot-height;
+$card-fly-width: math.div($card-width * $card-fly-height, $card-height);
+
+$card-overhang: 60px;
+$card-side-overhang: 40px;
+
+.ecosystem {
+  position: relative;
+  min-height: 100vh;
+  padding: $space-xl * 1.2 0 $space-xxxl;
+  background-color: $color-black-1;
+}
+
+.heading {
+  font-family: $font-display;
+  font-size: 60px;
+  font-weight: $hero-weight;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  text-align: center;
+  color: $color-white;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.accent {
+  display: inline-block;
+  padding: 0 15px;
+  border-radius: 10px;
+  background: $gradient-blue;
+  color: $color-white;
+  line-height: 1;
+}
+
+.hand {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: $hand-height;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.card {
+  position: absolute;
+  left: 50%;
+  --display-w: #{$card-width};
+  --display-h: #{$card-height};
+  width: $card-fly-width;
+  height: $card-fly-height;
+  bottom: calc(#{$card-reveal} - #{$card-height} / 2 - #{$card-fly-height} / 2);
+  margin-left: calc(#{$card-fly-width} / -2);
+  background-image: url('../../assets/card.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: $radius-button;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+}
+
+.slotGrid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-xl;
+  margin-top: 10vh;
+}
+
+.slotRow {
+  display: flex;
+  justify-content: center;
+  gap: $space-xl;
+}
+
+.slot {
+  position: relative;
+  width: $slot-width;
+  height: $slot-height;
+  border-radius: $radius-button;
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+}
+
+.dealtCard {
+  border-radius: $radius-button;
+  border: 6px solid rgba(255, 255, 255, 0.92);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  will-change: transform;
+
+  background-image: linear-gradient(to top, rgba(8, 10, 14, 0.88) 0%, rgba(8, 10, 14, 0.4) 45%, transparent 75%),
+    $gradient-blue;
+
+  &.hasImage {
+    background: $gradient-blue;
+  }
+}
+
+.dealtBody {
+  position: relative;
+  padding: $space-lg;
+}
+
+.cardAsset {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(-#{$card-overhang} 0 0 0 round $radius-button);
+  pointer-events: none;
+
+  &.sideOverhang {
+    clip-path: inset(-#{$card-overhang} -#{$card-side-overhang} 0 -#{$card-side-overhang} round $radius-button);
+  }
+}
+
+.cardAssetImg {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 140%;
+  height: auto;
+  // Displayed well past native resolution on 2x screens (see conversation),
+  // so an unsharp mask fakes back some edge contrast the upscale lost.
+  filter: url('#ecosystemSharpen');
+}
+
+.dealtScrim {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(to top, rgba(8, 9, 32, 1) 0%, rgba(8, 9, 32, 1) 30%, rgba(8, 9, 32, 0.90) 40%, transparent 60%);
+  pointer-events: none;
+}
+
+.dealtVignette {
+  position: absolute;
+  inset: 0;
+  border-radius: $radius-button;
+  box-shadow:
+    inset 0 48px 56px -16px rgba(8, 10, 14, 0.8),
+    inset 40px 0 48px -20px rgba(8, 10, 14, 0.55),
+    inset -40px 0 48px -20px rgba(8, 10, 14, 0.55);
+  pointer-events: none;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.eyebrowNum {
+  font-family: $font-display;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+  color: $color-orange-1;
+}
+
+.eyebrowRule {
+  width: 1px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.eyebrowLabel {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.dealtTitle {
+  font-family: $font-display;
+  font-size: 36px;
+  font-weight: 900;
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: $color-white;
+  margin: 0;
+
+  &::after {
+    content: '';
+    display: block;
+    width: 56px;
+    height: 5px;
+    margin-top: 12px;
+    border-radius: 3px;
+    background: $gradient-orange;
+  }
+}
+
+.titleAccent {
+  background: $gradient-blue;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.dealtCopy {
+  font-size: 15px;
+  line-height: 1.45;
+  color: $color-light-grey-1;
+  margin: 10px 0 0;
+}

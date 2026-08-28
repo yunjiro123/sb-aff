@@ -8,8 +8,9 @@
   justify-content: space-between;
   gap: $space-xxl * 1.2;
   margin: 0;
-  padding: $space-xl * 2.4 0 $space-xl * 1.2;
+  padding: $space-xl * 2.4 0 0;
   border-radius: 0;
+  min-height:100vh;
 
   // Ambient section glow, biased toward .visual rather than dead-center.
   // Forced to zero at y=0 via mask so it can't leave any seam against the navbar above.

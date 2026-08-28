@@ -1,0 +1,181 @@
+@use '../../styles/tokens' as *;
+
+.ecosystem {
+  position: relative;
+  padding: $space-xl * 1.2 0 $space-xxxl;
+}
+
+.heading {
+  font-family: $font-display;
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  text-align: center;
+  color: $color-white;
+  margin: 0 0 $space-xxl;
+  text-transform: uppercase;
+}
+
+.accent {
+  background: $gradient-blue;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+// Bento grid: tall card on the left spans both top rows, a wide card fills
+// the rest of row 1, two even cards split row 2 under it, and a full-width
+// band closes the section — matches the reference layout's proportions.
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: 300px 300px 280px;
+  grid-template-areas:
+    'games stats stats'
+    'games ltv   apps'
+    'product product product';
+  gap: $space-sm;
+}
+
+%card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: $space-lg;
+  border-radius: $radius-card;
+  overflow: hidden;
+  will-change: transform, opacity;
+}
+
+%cardDark {
+  @extend %card;
+  background: $color-grey-2;
+}
+
+%cardGradient {
+  @extend %card;
+  background:
+    radial-gradient(120% 140% at 100% 0%, rgba(255, 255, 255, 0.16), transparent 55%),
+    $gradient-blue;
+}
+
+.cardTitle {
+  font-family: $font-display;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: $color-white;
+  margin: 0 0 $space-xs;
+}
+
+.cardCopy {
+  font-size: 16px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.8);
+  max-width: 46ch;
+}
+
+// Neutral fill standing in for real screenshots/photography to be dropped
+// in later — kept as its own class so swapping to a real <img> is a
+// one-line change, no layout rework.
+.mediaPlaceholder {
+  flex: 1;
+  min-height: 0;
+  border-radius: $radius-button;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+}
+
+.games {
+  @extend %cardDark;
+  grid-area: games;
+  gap: $space-m;
+
+  .mediaPlaceholder {
+    margin-bottom: $space-xs;
+  }
+}
+
+.stats {
+  @extend %cardGradient;
+  grid-area: stats;
+  flex-direction: row;
+  align-items: stretch;
+  gap: $space-lg;
+}
+
+.statsBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.stats .mediaPlaceholder {
+  flex: 1.1;
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.ltv {
+  @extend %cardDark;
+  grid-area: ltv;
+  gap: $space-m;
+}
+
+.apps {
+  @extend %cardGradient;
+  grid-area: apps;
+  gap: $space-m;
+  background:
+    radial-gradient(120% 140% at 100% 0%, rgba(255, 255, 255, 0.16), transparent 55%),
+    linear-gradient(94.89deg, #4891ff, color-mix(in srgb, #7949ff 70%, $color-violet-1 30%));
+}
+
+.appIcons {
+  display: flex;
+  align-items: center;
+  gap: $space-sm;
+}
+
+.appIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: $radius-button;
+  background: rgba(255, 255, 255, 0.16);
+
+  svg {
+    width: 22px;
+    height: 22px;
+    color: $color-white;
+  }
+}
+
+.product {
+  @extend %cardGradient;
+  grid-area: product;
+  flex-direction: row;
+  align-items: stretch;
+  gap: $space-xl;
+  padding: $space-xl;
+}
+
+.productBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.product .mediaPlaceholder {
+  flex: 1;
+  max-width: 420px;
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+}
