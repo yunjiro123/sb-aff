@@ -57,20 +57,20 @@ const CONTENT = [
     asset: sbThird,
   },
   {
-    eyebrow: 'Mobile Apps',
-    title: 'iOS & Android Engaging Apps',
-    highlight: 'iOS & Android',
-    copy: 'Native mobile apps proven to convert and retain players across the globe.',
+    eyebrow: 'Payments',
+    title: 'Flexible Payouts',
+    highlight: 'Payouts',
+    copy: 'Get paid the way that works for you — multiple currencies and methods, with fast, reliable transfers.',
     asset: sbFourth,
     // Two side-by-side phones read best wider than the card, so this one
     // also bleeds past the left/right edges (see .cardAsset.sideOverhang).
     sideOverhang: true,
   },
   {
-    eyebrow: 'Platform',
-    title: 'Own Product',
-    highlight: 'Product',
-    copy: 'A unique iGaming product with no market alternative, proven by millions of players around the globe.',
+    eyebrow: 'Worldwide',
+    title: 'Global Domination',
+    highlight: 'Domination',
+    copy: 'Reach players in every major market, backed by localized support and licenses that travel with you.',
     asset: sbFifth,
   },
 ]
