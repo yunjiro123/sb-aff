@@ -1,0 +1,269 @@
+@use '../../styles/tokens' as *;
+@use '../../styles/mixins' as *;
+
+$visual-size: 1200px;
+$avatar-size: 78px;
+// How far each avatar slides back over the previous one.
+$avatar-overlap: 26px;
+
+.geography {
+  padding: $space-lg 0;
+  background-color: $color-black-1;
+}
+
+// The panel that actually clips the globe now — overflow: hidden here instead
+// of on .geography is what keeps the oversized render contained to this
+// rounded box instead of bleeding to the page edge. Sits inside Container, so
+// its own width (and therefore how far .visual's negative left can bleed
+// before hitting this edge) is capped at $site-max-width rather than the full
+// viewport.
+.card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 32px;
+  background-color: $color-grey-2;
+  padding: $space-xl;
+}
+
+.row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width:50%;
+}
+
+// Small colour label above the heading, Apple-style — the one accent colour
+// in the block, everything else in this section stays white/grey.
+.eyebrow {
+  @include eyebrow;
+  display: block;
+}
+
+.heading {
+  font-family: $font-display;
+  // Matches EcosystemAlt's heading, which is also a literal 60px rather than
+  // tied to $hero-size (86.4px) — kept consistent with that section rather
+  // than the token.
+  font-size: 60px;
+  font-weight: $hero-weight;
+  line-height: 1.05;
+  letter-spacing: $hero-letter-spacing;
+  color: $color-white;
+  margin: $space-sm 0 0;
+}
+
+.copy {
+  font-size: 20px;
+  line-height: 1.6;
+  color: $color-light-grey-1;
+  margin-top: $space-m;
+}
+
+.statRow {
+  display: flex;
+  align-items: center;
+  gap: $space-xl;
+  width: 100%;
+  margin-top: $space-m;
+}
+
+.statBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.statNum {
+  @include gradient-text;
+  font-family: $font-display;
+  font-size: 72px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.statNumPlus {
+  @include gradient-text;
+}
+
+.statLabel {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: $color-light-grey-1;
+}
+
+.statDivider {
+  align-self: stretch;
+  width: 1px;
+  background: linear-gradient(180deg, #4891ff, #7949ff);
+}
+
+.avatars {
+  display: flex;
+}
+
+.avatar {
+  display: block;
+  width: $avatar-size;
+  height: $avatar-size;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid $color-blue-1;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+
+  &:not(:first-child) {
+    margin-left: -$avatar-overlap;
+  }
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.avatarLead {
+  position: relative;
+  border-color: #7949ff;
+}
+
+.divider {
+  width: 100%;
+  height: 1px;
+  margin-top: $space-lg;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+// Row wrapper for the "join the network" line and the CTA.
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-xl;
+  width: 100%;
+  margin-top: $space-m;
+}
+
+.actionsInfo {
+  display: flex;
+  align-items: center;
+  gap: $space-sm;
+  font-size: 17px;
+  font-weight: 500;
+  color: $color-light-grey-1;
+}
+
+.actionsIcon {
+  @include flex-center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(121, 73, 255, 0.3);
+  color: $color-white;
+
+  svg {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+.cta {
+  @include cta-pill(0 17px 38px rgba(121, 73, 255, 0.45));
+  justify-content: space-between;
+  gap: $space-xl;
+  padding: 14px 14px 14px $space-lg;
+
+  &:hover {
+    .ctaArrow {
+      transform: translateX(3px);
+    }
+  }
+}
+
+.ctaArrow {
+  @include flex-center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  transition: transform $duration-hover $ease-standard;
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+// Positioned against .card (the nearest positioned ancestor), not .geography —
+// its negative left now bleeds toward .card's own rounded edge rather than
+// the page edge, and gets clipped there by .card's overflow: hidden instead
+// of spilling into the page. left/top stay percentages rather than a fixed px
+// offset, so the bleed scales with .card's width. Anchored near the card's
+// top rather than centred, so the globe's upper portion stays clear while its
+// bottom — being far taller than the card — runs past the card's bottom edge
+// and gets cropped the same way.
+.visual {
+  position: absolute;
+  top: -4%;
+  left: -25%;
+  z-index: 0;
+  width: $visual-size;
+  height: $visual-size;
+
+  // Ambient glow behind the render, sized closest-side off the inset box —
+  // this is the section's only glow now, living on .visual instead of
+  // .geography so it's automatically centred on the globe wherever the box
+  // is positioned, rather than needing hand-tuned percentages of the whole
+  // section to line up with it. Negative inset expands the box past .visual's
+  // own edges, so the glow visibly extends beyond the sphere's silhouette
+  // instead of fading out inside it.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -150px;
+    z-index: -1;
+    background: radial-gradient(
+      closest-side,
+      rgba(121, 73, 255, 0.35),
+      rgba(72, 145, 255, 0.16) 45%,
+      transparent 76%
+    );
+    pointer-events: none;
+  }
+
+  // Contact shadow grounding the globe. Two things it has to get right:
+  // the sphere's lower edge lands ~14% up from this box's floor (FOV 33 at
+  // distance 4.75 puts its diameter at ~71% of the canvas), so the ellipse is
+  // centred below that to tuck under the sphere rather than hide behind it;
+  // and the page underneath is #13171c, not black, so the tone has to sit well
+  // below that charcoal to register as a shadow at all. Falloff is left to the
+  // gradient — blurring on top of it only dilutes the peak.
+  &::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 4%;
+    z-index: -1;
+    width: 70%;
+    height: 13%;
+    transform: translateX(-50%);
+    background: radial-gradient(
+      ellipse at center,
+      rgba(2, 5, 14, 0.85),
+      rgba(2, 5, 14, 0.45) 42%,
+      transparent 72%
+    );
+    pointer-events: none;
+  }
+}

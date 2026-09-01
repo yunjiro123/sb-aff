@@ -27,14 +27,24 @@ $font-body: 'DM Sans', system-ui, sans-serif;
 // Hero H1 — sized for the banner-style hero (narrower text column next to
 // the brand photo), not the earlier full-width treatment.
 $hero-size: 86.4px;
-$hero-weight: 700;
+$hero-weight: 800;
 $hero-line-height: 1.2;
 $hero-letter-spacing: -0.02em;
+
+// Small colour label above a section heading (Geography, EcosystemAlt, …) —
+// one shared size so they stay in sync instead of each hardcoding its own.
+$eyebrow-size: 22px;
 
 // Site content width — sections span full width (edge-to-edge), but the
 // content inside each section is centered within this narrower rail.
 // Matches Wise's reference container width. See DESIGN.md.
 $site-max-width: 1600px;
+
+$breakpoint-xs: 640px;
+$breakpoint-sm: 768px;
+$breakpoint-md: 1024px;
+$breakpoint-lg: 1200px;
+$breakpoint-xl: 1440px;
 
 // Spacing (8px grid)
 $space-xs: 8px;

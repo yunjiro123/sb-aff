@@ -1,5 +1,6 @@
 @use 'sass:math';
 @use '../../styles/tokens' as *;
+@use '../../styles/mixins' as *;
 
 $card-width: 260px;
 $card-height: 364px;
@@ -22,6 +23,17 @@ $card-side-overhang: 40px;
   background-color: $color-black-1;
 }
 
+// Small colour label above the heading, matching Geography's. Named
+// .sectionEyebrow rather than .eyebrow — .eyebrow is already taken below by
+// the per-card numbered label (.eyebrow/.eyebrowNum/.eyebrowRule/.eyebrowLabel
+// inside .dealtBody), which is a different, unrelated element.
+.sectionEyebrow {
+  @include eyebrow;
+  display: block;
+  text-align: center;
+  margin: auto;
+}
+
 .heading {
   font-family: $font-display;
   font-size: 60px;
@@ -30,8 +42,7 @@ $card-side-overhang: 40px;
   letter-spacing: -0.01em;
   text-align: center;
   color: $color-white;
-  margin: 0;
-  text-transform: uppercase;
+  margin: 0 0;
 }
 
 .accent {
@@ -41,6 +52,8 @@ $card-side-overhang: 40px;
   background: $gradient-blue;
   color: $color-white;
   line-height: 1;
+  text-transform: uppercase;
+
 }
 
 .hand {
@@ -74,14 +87,14 @@ $card-side-overhang: 40px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: $space-xl;
+  gap: $space-xxl;
   margin-top: 10vh;
 }
 
 .slotRow {
   display: flex;
   justify-content: center;
-  gap: $space-xl;
+  gap: $space-xxl;
 }
 
 .slot {
@@ -142,7 +155,7 @@ $card-side-overhang: 40px;
 .dealtScrim {
   position: absolute;
   inset: 0;
-  background-image: linear-gradient(to top, rgba(8, 9, 32, 1) 0%, rgba(8, 9, 32, 1) 30%, rgba(8, 9, 32, 0.90) 40%, transparent 60%);
+  background-image: linear-gradient(to top, rgba(8, 9, 32, 1) 0%, rgba(8, 9, 32, 1) 30%, rgba(8, 9, 32, 0.90) 40%, transparent 65%);
   pointer-events: none;
 }
 
@@ -179,41 +192,25 @@ $card-side-overhang: 40px;
 }
 
 .eyebrowLabel {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   line-height: 1;
   letter-spacing: 0.2em;
-  text-transform: uppercase;
   color: rgba(255, 255, 255, 0.82);
 }
 
 .dealtTitle {
   font-family: $font-display;
-  font-size: 36px;
+  font-size: 37px;
   font-weight: 900;
   line-height: 1.02;
   letter-spacing: -0.01em;
-  text-transform: uppercase;
   color: $color-white;
   margin: 0;
-
-  &::after {
-    content: '';
-    display: block;
-    width: 56px;
-    height: 5px;
-    margin-top: 12px;
-    border-radius: 3px;
-    background: $gradient-orange;
-  }
 }
 
 .titleAccent {
-  background: $gradient-blue;
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
+  @include gradient-text;
 }
 
 .dealtCopy {

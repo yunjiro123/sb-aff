@@ -1,10 +1,11 @@
 @use '../../styles/tokens' as *;
+@use '../../styles/mixins' as *;
 
 // No background of its own, blending into .hero. Absolute (anchored to
 // .app's position: relative) so it overlays the top of .hero instead of
 // pushing it down as an in-flow sibling.
 .navbar {
-  position: relative;
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
@@ -50,9 +51,7 @@
 }
 
 .button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  @include flex-center;
   padding: 8px 20px;
   border-radius: $radius-pill;
   color: $color-white;

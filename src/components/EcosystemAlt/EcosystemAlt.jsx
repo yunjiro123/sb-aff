@@ -276,6 +276,8 @@ function EcosystemAlt() {
       </svg>
 
       <Container>
+        <span className={styles.sectionEyebrow}>Ecosystem</span>
+
         <h2 className={styles.heading}>
           Advanced Ecosystem For Profit
           <br />

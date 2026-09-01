@@ -1,0 +1,70 @@
+@use './tokens' as *;
+
+@mixin xs {
+  @media (max-width: $breakpoint-xs) {
+    @content;
+  }
+}
+
+@mixin sm {
+  @media (max-width: $breakpoint-sm) {
+    @content;
+  }
+}
+
+@mixin md {
+  @media (max-width: $breakpoint-md) {
+    @content;
+  }
+}
+
+@mixin lg {
+  @media (max-width: $breakpoint-lg) {
+    @content;
+  }
+}
+
+@mixin xl {
+  @media (max-width: $breakpoint-xl) {
+    @content;
+  }
+}
+
+@mixin gradient-text($gradient: $gradient-blue) {
+  background: $gradient;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin cta-pill($hover-shadow) {
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  background: $gradient-blue;
+  border-radius: $radius-pill;
+  color: $color-white;
+  font-weight: 700;
+  font-size: 20px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.3);
+  transition: transform $duration-hover $ease-standard, box-shadow $duration-hover $ease-standard;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $hover-shadow;
+    color: $color-white;
+  }
+}
+
+@mixin eyebrow {
+  font-size: $eyebrow-size;
+  font-weight: 700;
+  color: $color-orange-1;
+}
