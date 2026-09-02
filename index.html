@@ -9,9 +9,26 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700;800&display=swap"
     />
+    <!--
+      External stylesheet, not inline: served from public/ so it applies
+      before main.jsx's bundle (and global.scss, imported inside it) has
+      downloaded and parsed, same as the Google Fonts link above — without
+      the rules living inside this HTML file. See public/boot.css.
+    -->
+    <link rel="stylesheet" href="/boot.css" />
     <title>Starzbet Partners</title>
   </head>
   <body>
+    <!--
+      Handed off to (and removed by) the React Loader once it has mounted and
+      painted an identical overlay, so the swap is invisible. Not aria-hidden:
+      it is announced as a loading state, same as its React counterpart.
+    -->
+    <div id="boot" role="status" aria-live="polite">
+      <img class="boot-logo" src="/src/assets/sb-partners.png" alt="" />
+      <span class="boot-progress"></span>
+      <span class="boot-label">Loading</span>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

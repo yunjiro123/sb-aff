@@ -159,14 +159,15 @@
   background: color-mix(in srgb, #4891ff 50%, #7949ff 50%);
 }
 
-// Two canvases (behind/in front of the portrait) — see Coins3D.jsx. Padding must match its MARGIN.
+// Two canvases (behind/in front of the portrait) — see Coins3D.jsx. Offset
+// must match its MARGIN (80), size its CANVAS_WIDTH/HEIGHT (792+160, 690+160).
 .coinCanvasBack,
 .coinCanvasFront {
   position: absolute;
-  top: -225px;
-  left: -225px;
-  width: 1242px;
-  height: 1140px;
+  top: -80px;
+  left: -80px;
+  width: 952px;
+  height: 850px;
   pointer-events: none;
 }
 

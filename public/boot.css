@@ -1,0 +1,110 @@
+/*
+  Critical boot styles for #boot in index.html — an external stylesheet
+  deliberately, not inlined. global.scss is imported from main.jsx, so it
+  only applies once the JS bundle has downloaded and parsed; a <link> here
+  applies before that, same as the Google Fonts stylesheet already does,
+  without living inside the HTML as inline CSS.
+
+  #boot stands in for the React Loader (which cannot render until that same
+  bundle is running) and is removed by it once mounted — the two are styled
+  identically so the handoff is invisible; keep this file and
+  Loader.module.scss in sync.
+*/
+
+#boot {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+  background: #13171c;
+}
+
+#boot::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 640px;
+  height: 640px;
+  max-width: 130vw;
+  max-height: 130vw;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(72, 145, 255, 0.22), rgba(121, 73, 255, 0.12) 45%, transparent 75%);
+  pointer-events: none;
+}
+
+.boot-logo {
+  position: relative;
+  width: 240px;
+  max-width: 60vw;
+  height: auto;
+  animation: boot-logo-in 0.6s ease both;
+}
+
+.boot-progress {
+  position: relative;
+  overflow: hidden;
+  width: 200px;
+  max-width: 50vw;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.boot-progress::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 40%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #4891ff, #7949ff);
+  animation: boot-sweep 1.25s ease infinite;
+}
+
+.boot-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@keyframes boot-logo-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes boot-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boot-logo {
+    animation: none;
+  }
+
+  .boot-progress::after {
+    animation: none;
+    width: 100%;
+    opacity: 0.5;
+  }
+}

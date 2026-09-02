@@ -1,5 +1,7 @@
 import Container from '../Container/Container.jsx'
 import Globe from './Globe.jsx'
+import useRevealAnimation from '../../hooks/useRevealAnimation.js'
+import useDeferredMount from '../../hooks/useDeferredMount.js'
 import avatar1 from '../../assets/avatar-1.webp'
 import avatar2 from '../../assets/avatar-2.webp'
 import avatar3 from '../../assets/avatar-3.webp'
@@ -30,30 +32,39 @@ const AVATARS = [
 ]
 
 function Geography() {
+  const revealRef = useRevealAnimation()
+  // Globe's mount is where its WebGL context, shader compilation and scene
+  // graph get built — synchronous work that has no business running during
+  // first paint when the section is this far below the fold. (The dot field
+  // it used to compute here is now baked at build time; see
+  // scripts/build-globe-dots.mjs.) rootMargin starts it a little before it's
+  // actually in view, so there's no pop-in when the user scrolls down to it.
+  const [visualRef, shouldMountGlobe] = useDeferredMount('600px')
+
   return (
     <section className={styles.geography}>
       <Container>
         <div className={styles.card}>
-          <div className={styles.visual}>
-            <Globe />
+          <div className={styles.visual} ref={visualRef}>
+            {shouldMountGlobe && <Globe arcCount={5} />}
           </div>
 
           <div className={styles.row}>
-            <div className={styles.content}>
-              <span className={styles.eyebrow}>Global Presence</span>
+            <div className={styles.content} ref={revealRef}>
+              <span className={styles.eyebrow} data-reveal>Global Presence</span>
 
-              <h2 className={styles.heading}>
+              <h2 className={styles.heading} data-reveal>
                 One platform.
                 <br />
                 Every corner of the world.
               </h2>
 
-              <p className={styles.copy}>
+              <p className={styles.copy} data-reveal>
                 We operate on every continent with local payment systems and region-specific
                 customization, so every player gets a fast, familiar experience — wherever they are.
               </p>
 
-              <div className={styles.statRow}>
+              <div className={styles.statRow} data-reveal>
                 <div className={styles.statBlock}>
                   <p className={styles.statNum}>
                     10K<span className={styles.statNumPlus}>+</span>
@@ -77,9 +88,9 @@ function Geography() {
                 </div>
               </div>
 
-              <div className={styles.divider} />
+              <div className={styles.divider} data-reveal />
 
-              <div className={styles.actions}>
+              <div className={styles.actions} data-reveal>
                 <div className={styles.actionsInfo}>
                   <span className={styles.actionsIcon}>
                     <AffiliatesIcon />

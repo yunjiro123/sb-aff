@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js'
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 import coinGoldGlbUrl from '../../assets/coin.glb'
 import coinBlueGlbUrl from '../../assets/coin-blue.glb'
@@ -18,10 +19,19 @@ import styles from './Hero.module.scss'
 // stays centered on the (now taller) box.
 const BOX_WIDTH = 792
 const BOX_HEIGHT = 690
-// Radius/perspective/margin scaled 1.25x with the blob's height growth
-// (552->690) — re-centering alone (BOX_HEIGHT) wasn't enough, the ring
-// itself still needed to be bigger to clear the now-taller silhouette.
-const MARGIN = 225
+// Radius/perspective scaled 1.25x with the blob's height growth (552->690)
+// — re-centering alone (BOX_HEIGHT) wasn't enough, the ring itself still
+// needed to be bigger to clear the now-taller silhouette.
+//
+// MARGIN was scaled along with them rather than derived, which left it far
+// larger than the orbit needs: projecting the ring (RADIUS, TILT, LEAN,
+// ORBIT_OFFSET_Y) through the perspective divide, plus each coin's own 44px
+// half-extent at its nearest-to-camera scale, the swing only leaves the box
+// on the right, by ~27px — every other side stays inside it. 80 keeps a ~3x
+// buffer on that while cutting ~43% of the pixels these two canvases were
+// clearing and compositing every frame. Hero.module.scss's .coinCanvas*
+// rules hardcode the resulting offset/size — keep them in sync.
+const MARGIN = 80
 const CANVAS_WIDTH = BOX_WIDTH + MARGIN * 2
 const CANVAS_HEIGHT = BOX_HEIGHT + MARGIN * 2
 const RADIUS = 400
@@ -51,7 +61,7 @@ const TARGET_DIAMETER = 88
 // Evenly spaced delays around one lap (was a hardcoded 8-entry array stepping
 // by DURATION/8 = 3.25). COIN_COUNT is deliberately not a multiple of
 // MODELS.length (3) — see the COINS comment below for why that matters.
-const COIN_COUNT = 10
+const COIN_COUNT = 6
 const DELAYS = Array.from({ length: COIN_COUNT }, (_, i) => (-i * DURATION) / COIN_COUNT)
 // The chip models are authored lying flat where the gold coin stands upright:
 // the chip's mesh is 1.899 x 0.336 x 1.899, so its thin axis (the face
@@ -119,7 +129,10 @@ function createRig() {
 
 function createRenderer(canvas) {
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true })
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+  // Two full-size canvases render every frame here, so pixel ratio costs
+  // double what it does in a single-canvas scene — capped at 1 (matching
+  // Globe) to keep that within budget.
+  renderer.setPixelRatio(1)
   renderer.setSize(CANVAS_WIDTH, CANVAS_HEIGHT, false)
   return renderer
 }
@@ -235,13 +248,21 @@ function Coins3D() {
     }
 
     const loader = new GLTFLoader()
+    // The optimized coin models are geometry-compressed with EXT_meshopt_compression;
+    // without a decoder GLTFLoader can't parse them at all.
+    loader.setMeshoptDecoder(MeshoptDecoder)
 
     MODELS.forEach(({ url, rotation }, modelIndex) => {
-      loader.load(url, (gltf) => {
-        if (cancelled) return
-        const template = buildTemplate(gltf, rotation)
-        COINS.filter((coin) => coin.model === modelIndex).forEach((coin) => addCoin(template, coin.delay))
-      })
+      loader.load(
+        url,
+        (gltf) => {
+          if (cancelled) return
+          const template = buildTemplate(gltf, rotation)
+          COINS.filter((coin) => coin.model === modelIndex).forEach((coin) => addCoin(template, coin.delay))
+        },
+        undefined,
+        (error) => console.error(`Failed to load coin model ${url}`, error),
+      )
     })
 
     const startTime = performance.now()

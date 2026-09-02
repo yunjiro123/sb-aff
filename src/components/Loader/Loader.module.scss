@@ -1,0 +1,135 @@
+@use '../../styles/tokens' as *;
+@use '../../styles/mixins' as *;
+
+// Loader.jsx unmounts the overlay after this long, and hands off to Hero's
+// reveal at the same moment — keep the two in sync (FADE_MS there).
+$fade-duration: 450ms;
+
+// IMPORTANT: index.html's #boot rules mirror everything below. It stands in
+// for this component during the window before the bundle parses, so the two
+// have to look identical or the handoff flashes. Change one, change both.
+
+// Above the navbar's z-index: 10 — this covers everything until it clears.
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $space-xl;
+  background: $color-black-1;
+  transition: opacity $fade-duration ease;
+
+  // Ambient glow behind the mark, same recipe as Hero's .visual::before —
+  // what keeps this from reading as a generic spinner on black and places it
+  // in the same visual family as the page it precedes.
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 640px;
+    height: 640px;
+    max-width: 130vw;
+    max-height: 130vw;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(
+      closest-side,
+      rgba(72, 145, 255, 0.22),
+      rgba(121, 73, 255, 0.12) 45%,
+      transparent 75%
+    );
+    pointer-events: none;
+  }
+}
+
+.leaving {
+  opacity: 0;
+  // Stops it swallowing clicks during the fade, so the page is usable the
+  // moment it starts clearing rather than only once it's gone.
+  pointer-events: none;
+}
+
+.logo {
+  position: relative; // above the glow
+  width: 240px;
+  max-width: 60vw;
+  height: auto;
+  animation: logo-in 0.6s $ease-standard both;
+}
+
+// A slim gradient bar rather than a ring: the site's accent is a horizontal
+// blue-to-violet gradient, which a rotating border can't show off.
+.progress {
+  position: relative;
+  overflow: hidden;
+  width: 200px;
+  max-width: 50vw;
+  height: 3px;
+  border-radius: $radius-pill;
+  background: rgba(255, 255, 255, 0.1);
+
+  // Travels on transform only — no layout or paint per frame, just
+  // compositing, which matters given what else is initialising behind this.
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 40%;
+    border-radius: inherit;
+    background: $gradient-blue;
+    animation: progress-sweep 1.25s $ease-standard infinite;
+  }
+}
+
+// Announced by role="status" but not shown — the logo and bar carry the
+// meaning visually, and neither is readable.
+.label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@keyframes logo-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+// -100% starts it fully off the left edge; 250% carries its 40% width fully
+// past the right one.
+@keyframes progress-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+
+// A bar tracking back and forth forever is exactly what this setting is for.
+// The loader still reads as loading — it just holds still.
+@media (prefers-reduced-motion: reduce) {
+  .logo {
+    animation: none;
+  }
+
+  .progress::after {
+    animation: none;
+    width: 100%;
+    opacity: 0.5;
+  }
+}

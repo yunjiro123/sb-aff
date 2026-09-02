@@ -1,7 +1,7 @@
 @use '../../styles/tokens' as *;
 @use '../../styles/mixins' as *;
 
-$visual-size: 1200px;
+$visual-size: 1150px;
 $avatar-size: 78px;
 // How far each avatar slides back over the previous one.
 $avatar-overlap: 26px;
@@ -47,23 +47,12 @@ $avatar-overlap: 26px;
 }
 
 .heading {
-  font-family: $font-display;
-  // Matches EcosystemAlt's heading, which is also a literal 60px rather than
-  // tied to $hero-size (86.4px) — kept consistent with that section rather
-  // than the token.
-  font-size: 60px;
-  font-weight: $hero-weight;
-  line-height: 1.05;
-  letter-spacing: $hero-letter-spacing;
-  color: $color-white;
+  @include section-heading;
   margin: $space-sm 0 0;
 }
 
 .copy {
-  font-size: 20px;
-  line-height: 1.6;
-  color: $color-light-grey-1;
-  margin-top: $space-m;
+  @include section-sub;
 }
 
 .statRow {

@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import { Line2 } from 'three/examples/jsm/lines/Line2.js'
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js'
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js'
-import landGeoJson from '../../assets/ne-110m-land.json'
+import dotsUrl from '../../assets/globe-dots.bin?url'
 import styles from './Globe.module.scss'
 
 // Square backing store matching .visual's $visual-size in Geography.module.scss —
@@ -26,17 +26,11 @@ const CAMERA_FOV = 33
 // limb poke through; 0.995 is the largest gap that still hides them cleanly.
 const BODY_RADIUS = GLOBE_RADIUS * 0.995
 
-// Graticule spacing. 1.4deg gives ~33k candidate cells, ~9.5k of them land —
-// dense enough to resolve the Great Lakes and the UK/Ireland split, which is
-// what separates this from the 7 hand-drawn polygons it replaces. Dropping to
-// 1.0 roughly doubles the dot count; the GPU copes, but the grid stops reading
-// as a grid and turns into a solid mass.
-const DOT_STEP_DEG = 1.4
+// The ~11k land dot positions come from src/assets/globe-dots.bin, baked
+// offline by scripts/build-globe-dots.mjs at a 1.4deg graticule spacing —
+// changing that means rerunning `npm run build:globe-dots`, not editing
+// this file.
 const DOT_PIXELS = 3.2
-
-// Equirectangular land mask resolution. 2048x1024 is ~5.5px per graticule cell
-// at DOT_STEP_DEG, so coastline cells resolve without aliasing into the sea.
-const MASK_WIDTH = 2048
 
 // Lighting direction, in world space. The camera never moves, so this doubles
 // as the view-space direction and needs no per-frame transform. Up-and-left to
@@ -141,69 +135,18 @@ const toVec = (lng, lat) => {
   return new THREE.Vector3(Math.cos(phi) * Math.sin(lam), Math.sin(phi), Math.cos(phi) * Math.cos(lam))
 }
 
-// Rasterises the Natural Earth rings into an equirectangular bitmap once, then
-// samples that per grid cell. Testing ~33k cells against the 128 rings directly
-// would be millions of point-in-polygon tests at mount; this is one canvas fill
-// plus an O(1) lookup per cell. All rings of a polygon go into a single path
-// filled 'evenodd', so interior rings (the Caspian) punch through as holes.
-function buildLandMask() {
-  const width = MASK_WIDTH
-  const height = MASK_WIDTH / 2
-  const canvas = document.createElement('canvas')
-  canvas.width = width
-  canvas.height = height
-
-  const ctx = canvas.getContext('2d')
-  ctx.fillStyle = '#000'
-  ctx.fillRect(0, 0, width, height)
-  ctx.fillStyle = '#fff'
-
-  for (const feature of landGeoJson.features) {
-    const { type, coordinates } = feature.geometry
-    // ne_110m_land is all Polygon today, but the 50m tier mixes in
-    // MultiPolygon — normalising here keeps a data swap from breaking this.
-    const polygons = type === 'Polygon' ? [coordinates] : coordinates
-    for (const rings of polygons) {
-      ctx.beginPath()
-      for (const ring of rings) {
-        for (let i = 0; i < ring.length; i++) {
-          const x = ((ring[i][0] + 180) / 360) * width
-          const y = ((90 - ring[i][1]) / 180) * height
-          if (i === 0) ctx.moveTo(x, y)
-          else ctx.lineTo(x, y)
-        }
-        ctx.closePath()
-      }
-      ctx.fill('evenodd')
-    }
-  }
-
-  const rgba = ctx.getImageData(0, 0, width, height).data
-  const mask = new Uint8Array(width * height)
-  for (let i = 0; i < mask.length; i++) mask[i] = rgba[i * 4] > 127 ? 1 : 0
-  return { mask, width, height }
-}
-
-function buildDotPositions({ mask, width, height }) {
-  const positions = []
-  // One random per particle, baked once. It scatters brightness and picks out
-  // the minority that stay bright white — without it every particle in a region
-  // resolves to the same colour and the field reads as a flat sheet.
-  const randoms = []
-  // Constant-longitude graticule rather than equal-area sampling: columns
-  // converge toward the poles, which is the aligned grid texture the reference
-  // has and the previous Fibonacci scatter did not.
-  for (let lat = -90 + DOT_STEP_DEG / 2; lat < 90; lat += DOT_STEP_DEG) {
-    const y = Math.min(height - 1, Math.max(0, Math.floor(((90 - lat) / 180) * height)))
-    for (let lng = -180; lng < 180; lng += DOT_STEP_DEG) {
-      const x = Math.min(width - 1, Math.max(0, Math.floor(((lng + 180) / 360) * width)))
-      if (mask[y * width + x] !== 1) continue
-      const v = toVec(lng, lat)
-      positions.push(v.x * GLOBE_RADIUS, v.y * GLOBE_RADIUS, v.z * GLOBE_RADIUS)
-      randoms.push(Math.random())
-    }
-  }
-  return { positions: new Float32Array(positions), randoms: new Float32Array(randoms) }
+// Loads the dot field scripts/build-globe-dots.mjs baked offline, instead of
+// rasterising the Natural Earth rings to a canvas and sampling ~33k grid
+// cells against them at mount — same result, but computed once at build time
+// for every visitor instead of once per page load in each of their browsers.
+// Format: [count: uint32][positions: count*3 float32][randoms: count float32],
+// all little-endian, matching Float32Array's native layout directly.
+async function loadDotPositions(url) {
+  const buffer = await fetch(url).then((res) => res.arrayBuffer())
+  const count = new DataView(buffer).getUint32(0, true)
+  const positions = new Float32Array(buffer, 4, count * 3)
+  const randoms = new Float32Array(buffer, 4 + count * 3 * 4, count)
+  return { positions, randoms }
 }
 
 // Point sprites are square by default in WebGL, which is exactly the dot shape
@@ -365,7 +308,7 @@ function createRingTexture() {
 
 function createRenderer(canvas) {
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true })
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5))
   renderer.setSize(CANVAS_SIZE, CANVAS_SIZE, false)
   return renderer
 }
@@ -387,7 +330,9 @@ function createCamera() {
 // rather than a uniform band, and leans each bright section toward white —
 // the same "brighter reads whiter" coupling the particle field uses.
 function createAtmosphereRim() {
-  const geometry = new THREE.SphereGeometry(GLOBE_RADIUS * RIM_SCALE, 96, 96)
+  // 64x64 rather than 96x96 — both spheres are smooth-shaded with no sharp
+  // features, so the extra segments aren't visible at this render size.
+  const geometry = new THREE.SphereGeometry(GLOBE_RADIUS * RIM_SCALE, 64, 64)
   const material = new THREE.ShaderMaterial({
     transparent: true,
     depthWrite: false,
@@ -445,13 +390,16 @@ function createAtmosphereRim() {
   return new THREE.Mesh(geometry, material)
 }
 
-function slerp(a, b, t) {
+// Great-circle interpolation between two city vectors needs omega (the angle
+// between them) and its sine. Both depend only on the endpoints, which are
+// fixed for an arc's entire life — so this is computed once at spawn and
+// carried on the arc. It used to live inside a per-segment slerp(), which
+// meant recomputing an acos and a sin for all 49 segments of every arc on
+// every frame, and allocating a throwaway Vector3 for each of them.
+function greatCircleBasis(a, b) {
   const dot = Math.max(-1, Math.min(1, a.dot(b)))
   const omega = Math.acos(dot)
-  const sinOmega = Math.sin(omega) || 1e-6
-  const ka = Math.sin((1 - t) * omega) / sinOmega
-  const kb = Math.sin(t * omega) / sinOmega
-  return new THREE.Vector3(a.x * ka + b.x * kb, a.y * ka + b.y * kb, a.z * ka + b.z * kb)
+  return { omega, sinOmega: Math.sin(omega) || 1e-6 }
 }
 
 function disposeScene(scene) {
@@ -470,13 +418,14 @@ function disposeScene(scene) {
 
 // Plain three.js in one effect, matching Coins3D — there is nothing reactive
 // here, just a rig driven by a RAF loop.
-function Globe({ facingLng = 50, arcCount = 7 }) {
+function Globe({ facingLng = 50, arcCount = 5 }) {
   const canvasRef = useRef(null)
 
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
 
+    let cancelled = false
     const renderer = createRenderer(canvas)
     const camera = createCamera()
     const scene = new THREE.Scene()
@@ -491,7 +440,7 @@ function Globe({ facingLng = 50, arcCount = 7 }) {
     tiltGroup.add(spinGroup)
     scene.add(tiltGroup)
 
-    const body = new THREE.Mesh(new THREE.SphereGeometry(BODY_RADIUS, 96, 96), createBodyMaterial())
+    const body = new THREE.Mesh(new THREE.SphereGeometry(BODY_RADIUS, 64, 64), createBodyMaterial())
     spinGroup.add(body)
 
     // Fields sit inside the sphere, in the same local space as the dots, so
@@ -503,10 +452,10 @@ function Globe({ facingLng = 50, arcCount = 7 }) {
       strength: COLOR_FIELDS.map(({ strength }) => strength),
     }
 
-    const { positions, randoms } = buildDotPositions(buildLandMask())
+    // Geometry starts empty and is filled in once the precomputed dot field
+    // has loaded — a small fetch, not a blocking computation, so there's
+    // nothing to gate the rest of setup on.
     const dotGeometry = new THREE.BufferGeometry()
-    dotGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-    dotGeometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 1))
     const dotMaterial = createDotMaterial(pixelRatio, fields, arcCount)
     const dots = new THREE.Points(dotGeometry, dotMaterial)
     // The dot shell has no meaningful bounding sphere for the frustum culler to
@@ -514,6 +463,12 @@ function Globe({ facingLng = 50, arcCount = 7 }) {
     dots.frustumCulled = false
     spinGroup.add(dots)
     spinGroup.add(createAtmosphereRim())
+
+    loadDotPositions(dotsUrl).then(({ positions, randoms }) => {
+      if (cancelled) return
+      dotGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+      dotGeometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 1))
+    })
 
     const cities = CITY_LNG_LAT.map(([lng, lat]) => toVec(lng, lat))
     const glowTexture = createGlowTexture()
@@ -621,11 +576,16 @@ function Globe({ facingLng = 50, arcCount = 7 }) {
       let bi = ai
       while (bi === ai) bi = visible[Math.floor(Math.random() * visible.length)]
 
+      const a = cities[ai]
+      const b = cities[bi]
+
       return {
         ai,
         bi,
-        a: cities[ai],
-        b: cities[bi],
+        a,
+        b,
+        // Fixed for this arc's lifetime — see greatCircleBasis.
+        ...greatCircleBasis(a, b),
         start: now,
         dur: ARC_MIN_MS + Math.random() * ARC_EXTRA_MS,
         color: new THREE.Color(ARC_COLORS[Math.floor(Math.random() * ARC_COLORS.length)]),
@@ -644,15 +604,20 @@ function Globe({ facingLng = 50, arcCount = 7 }) {
         return
       }
 
+      const { a, b, omega, sinOmega } = arc
+
       for (let s = 0; s <= ARC_SEGMENTS; s++) {
         const u = tail + (head - tail) * (s / ARC_SEGMENTS)
-        const point = slerp(arc.a, arc.b, u)
+        const ka = Math.sin((1 - u) * omega) / sinOmega
+        const kb = Math.sin(u * omega) / sinOmega
         // Lift follows a sine over the flight, so the arc leaves the surface at
         // both ends and peaks outside the silhouette in between.
         const lift = GLOBE_RADIUS * (1 + ARC_LIFT * Math.sin(Math.PI * u))
-        arcPoints[s * 3] = point.x * lift
-        arcPoints[s * 3 + 1] = point.y * lift
-        arcPoints[s * 3 + 2] = point.z * lift
+        // Written straight into the buffer rather than through a Vector3 that
+        // would be allocated and discarded once per segment, per arc, per frame.
+        arcPoints[s * 3] = (a.x * ka + b.x * kb) * lift
+        arcPoints[s * 3 + 1] = (a.y * ka + b.y * kb) * lift
+        arcPoints[s * 3 + 2] = (a.z * ka + b.z * kb) * lift
       }
 
       slot.geometry.setPositions(arcPoints)
@@ -753,6 +718,7 @@ function Globe({ facingLng = 50, arcCount = 7 }) {
     observer.observe(canvas)
 
     return () => {
+      cancelled = true
       observer.disconnect()
       if (frameId !== null) cancelAnimationFrame(frameId)
       disposeScene(scene)

@@ -1,0 +1,244 @@
+@use '../../styles/tokens' as *;
+@use '../../styles/mixins' as *;
+
+.product {
+  padding: $space-lg 0;
+  background-color: $color-black-1;
+}
+
+// Same gradient recipe as Hero's .blob (soft white highlight over
+// $gradient-blue) rather than Geography's flat grey card, per the brief.
+.card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 32px;
+  padding: $space-xl;
+  // $gradient-blue's own stops, reversed (violet first, blue second) per the brief.
+  background: $gradient-blue-reverse;
+
+  // Blob itself gets its darker tone from filter: brightness(0.85), but that
+  // filter would also dim this card's children (heading, laptop, badges).
+  // A dark overlay on its own layer approximates the same brightness drop
+  // without touching anything stacked above it.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: rgba(0, 0, 0, 0.15);
+    pointer-events: none;
+  }
+}
+
+.row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 46%;
+}
+
+.eyebrow {
+  @include eyebrow;
+  display: block;
+}
+
+.heading {
+  @include section-heading;
+  margin: $space-sm 0 0;
+}
+
+.copy {
+  @include section-sub;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+// ---- Laptop mockup ----
+
+// Oversized and bled off the card's bottom-right corner, the same treatment
+// as Geography's .visual (globe): absolutely positioned against .card
+// (behind .row's z-index: 1) at its natural size, then scaled up from that
+// bottom-right anchor so it grows toward the content instead of drifting
+// off both edges at once — .card's own overflow: hidden clips the bleed.
+.visual {
+  position: absolute;
+  z-index: 0;
+  bottom: -1%;
+  right: -20%;
+  width: 620px;
+  transform: scale(1.75);
+  transform-origin: bottom right;
+}
+
+.laptop {
+  position: relative;
+  width: 100%;
+}
+
+.screen {
+  position: relative;
+  background: #14161c;
+  border: 2px solid rgba(255, 255, 255, 0.22);
+  border-radius: 16px;
+  padding: 10px 10px 12px;
+  // Outer drop shadow grounds it against whatever's behind it; the inset
+  // highlight reads as light catching the bezel's top edge, both needed
+  // since the bezel's own dark tone barely separates from the section
+  // background it bleeds over.
+  box-shadow:
+    0 30px 60px rgba(2, 5, 14, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.browserBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 4px 10px;
+  background: $color-grey-2;
+  border-top-left-radius: 8px;
+}
+
+.browserLogo {
+  height: 13px;
+  width: auto;
+}
+
+.browserActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.browserBtn {
+  @include flex-center;
+  padding: 3px 9px;
+  border-radius: $radius-pill;
+  color: $color-white;
+  font-size: 8px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.browserLogin {
+  background: $gradient-orange;
+}
+
+.browserJoin {
+  background: $gradient-blue;
+}
+
+.browserIcon {
+  @include flex-center;
+  color: rgba(255, 255, 255, 0.75);
+
+  svg {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+// Same footprint the tile grid used to occupy (3 rows * 84px + 2 * 6px gaps),
+// so the bezel/hinge/base proportions built around that height still hold.
+.screenVideo {
+  display: block;
+  width: 100%;
+  height: 264px;
+  object-fit: cover;
+  border-bottom-left-radius: 8px;
+}
+
+// Thin hinge line between the screen and the base, echoing a laptop's lid seam.
+.hinge {
+  height: 5px;
+  margin: 0 6%;
+  background: linear-gradient(180deg, #0c0d11, #2a2d34);
+  border-radius: 0 0 3px 3px;
+}
+
+// Flared trapezoid deck under the screen, plus a grounding shadow beneath it.
+.base {
+  position: relative;
+  height: 12px;
+  margin: 0 -3%;
+  background: linear-gradient(180deg, #3a3d44, #202329);
+  clip-path: polygon(3% 0, 97% 0, 100% 100%, 0% 100%);
+  border-radius: 0 0 8px 8px;
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    width: 40%;
+    height: 14px;
+    transform: translateX(-50%);
+    background: radial-gradient(ellipse at center, rgba(2, 5, 14, 0.4), transparent 72%);
+    pointer-events: none;
+  }
+}
+
+// ---- Feature badges ----
+
+// Nested inside .content (46% of the card's width) rather than spanning the
+// full card, so the badges stack instead of sitting three-across.
+.badgeRow {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $space-sm;
+  width: 100%;
+  margin-top: $space-lg;
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  gap: $space-sm;
+  width: 100%;
+  padding: $space-xs;
+  // Same border treatment as EcosystemAlt's .dealtCard.
+  border-radius: $radius-button;
+}
+
+// Same shape and gradient as Geography's .statDivider.
+.badgeDivider {
+  align-self: stretch;
+  width: 1px;
+  background: linear-gradient(180deg, #4891ff, #7949ff);
+}
+
+.badgeIcon {
+  display: block;
+  flex-shrink: 0;
+  width: 65px;
+  height: 65px;
+  object-fit: contain;
+}
+
+.badgeBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.badgeTitle {
+  font-family: $font-display;
+  font-size: 20px;
+  font-weight: 800;
+  color: $color-white;
+}
+
+.badgeCopy {
+  font-size: 16.2px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+}

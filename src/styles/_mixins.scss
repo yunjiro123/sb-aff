@@ -68,3 +68,19 @@
   font-weight: 700;
   color: $color-orange-1;
 }
+
+@mixin section-heading {
+  font-family: $font-display;
+  font-size: 60px;
+  font-weight: $hero-weight;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: $color-white;
+}
+
+@mixin section-sub {
+  font-size: 20px;
+  line-height: 1.6;
+  color: $color-light-grey-1;
+  margin-top: $space-m;
+}
