@@ -393,7 +393,7 @@ function EcosystemAlt() {
           <span className={styles.sectionEyebrow} data-reveal>Ecosystem</span>
 
           <h2 className={styles.heading} data-reveal>
-            Advanced Ecosystem For Profit
+            Advanced ecosystem for profit
             <br />
             <span className={styles.accent}>Maximization</span>
           </h2>

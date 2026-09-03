@@ -1,0 +1,366 @@
+@use '../../styles/tokens' as *;
+@use '../../styles/mixins' as *;
+
+$avatar-size: 78px;
+$avatar-overlap: 26px;
+
+// Full-bleed — this section's own background is the gradient Product's
+// card uses, rather than that gradient living on a rounded card inside a
+// flat section like Product does.
+.contact {
+  position: relative;
+  overflow: hidden;
+  padding: $space-xl 0;
+  background: $gradient-blue-reverse;
+  border-top-left-radius: $radius-card;
+  border-top-right-radius: $radius-card;
+
+  // Same brightness-drop trick as Product's .card::before.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: rgba(0, 0, 0, 0.15);
+    pointer-events: none;
+  }
+
+  // Same low-poly facet technique as Hero's ::after (hard-stop diagonal
+  // gradients standing in for a faceted backdrop), recolored for this
+  // section's vivid gradient — white/black facets rather than Hero's
+  // blue-grey ones, which would disappear against a dark base but read
+  // clearly here.
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background:
+      linear-gradient(122deg, transparent 30%, rgba(255, 255, 255, 0.021) 30%, rgba(255, 255, 255, 0.021) 58%, transparent 58%),
+      linear-gradient(200deg, transparent 15%, rgba(255, 255, 255, 0.017) 15%, rgba(255, 255, 255, 0.017) 40%, transparent 40%);
+    pointer-events: none;
+  }
+}
+
+// Product/Geography-style split row — text on one side, visual bleeding
+// into the other side's gutter, instead of one tall centered stack.
+.row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: $space-xl;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1;
+  max-width: none;
+  text-align: left;
+}
+
+// ---- Avatars ----
+
+.avatars {
+  display: flex;
+}
+
+.avatar {
+  display: block;
+  width: $avatar-size;
+  height: $avatar-size;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid $color-blue-1;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+
+  &:not(:first-child) {
+    margin-left: -$avatar-overlap;
+  }
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.avatarPlus {
+  @include flex-center;
+  width: $avatar-size;
+  height: $avatar-size;
+  margin-left: -$avatar-overlap;
+  border-radius: 50%;
+  border: 3px solid $color-blue-1;
+  background: $gradient-blue;
+  color: $color-white;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+
+  svg {
+    width: 26px;
+    height: 26px;
+  }
+}
+
+// ---- Heading / copy ----
+
+.heading {
+  @include section-heading;
+  margin-top: $space-lg;
+}
+
+.copy {
+  @include section-sub;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+// ---- CTA ----
+// Same cta-pill mixin used elsewhere, recolored to Product's own orange
+// (the .browserLogin pill) rather than the mixin's default blue.
+.cta {
+  @include cta-pill(0 17px 38px rgba(255, 157, 0, 0.45));
+  margin-top: $space-m;
+  padding: 16px $space-xl;
+  background: $gradient-orange;
+}
+
+// ---- Contact block ----
+
+.contactBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: $space-lg;
+}
+
+// Matches Product's .badgeRow/.badge exactly: full-width rows stacked in a
+// column, icon + gradient divider + stacked text, no bounding box.
+.contactCards {
+  display: flex;
+  flex-direction: column;
+  gap: $space-sm;
+  width: 100%;
+}
+
+.contactCard {
+  display: flex;
+  align-items: center;
+  gap: $space-sm;
+  width: 100%;
+  padding: $space-xs;
+  border-radius: $radius-button;
+}
+
+.contactDivider {
+  align-self: stretch;
+  width: 1px;
+  background: linear-gradient(180deg, #4891ff, #7949ff);
+}
+
+.contactIcon {
+  @include flex-center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  color: $color-white;
+
+  svg {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+.contactText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.contactTitle {
+  font-family: $font-display;
+  font-size: 20px;
+  font-weight: 800;
+  color: $color-white;
+}
+
+.contactValue {
+  font-size: 16.2px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+}
+
+// ---- Visual ----
+
+// Flex column — sitting inside Container/.row (unlike the old bled-outside
+// version) so the image is centered against this column via ordinary flex
+// layout instead of an eyeballed percentage of the whole section.
+.visual {
+  position: relative;
+  flex: 1;
+  align-self: stretch;
+}
+
+// bottom is offset by -$space-xl, the exact amount of .contact's own
+// bottom padding — .visual's own box stops at the row's edge, so this
+// pushes the image past it by precisely that padding, landing it flush
+// with .contact's true bottom edge without needing to escape the flex
+// layout (and losing correct horizontal centering) to do it.
+.visualImage {
+  position: absolute;
+  z-index: 1;
+  bottom: -$space-xl;
+  left: 50%;
+  transform: translateX(-50%);
+  height: auto;
+  width:95%;
+  object-fit: contain;
+  object-position: bottom;
+  pointer-events: none;
+}
+
+// ---- Coins ----
+// Small "profit" motif scattered near the figure, above .visualImage.
+// Static opacity here is also the reduced-motion resting state — the
+// animation below only adds motion on top of it, never toggles visibility.
+.coin {
+  position: absolute;
+  z-index: 2;
+  height: auto;
+  opacity: 0.85;
+  pointer-events: none;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.35));
+}
+
+// nth-child counts .visualImage as the 1st child, so the six coins are
+// 2-7 — each starts flush with the bottom of .visual and rises from there.
+.coin:nth-child(2) {
+  left: 20%;
+  bottom: -20%;
+  width: 56px;
+}
+
+.coin:nth-child(3) {
+  left: 30%;
+  bottom: -20%;
+  width: 68px;
+}
+
+.coin:nth-child(4) {
+  left: 40%;
+  bottom: -20%;
+  width: 48px;
+}
+
+.coin:nth-child(5) {
+  left: 50%;
+  bottom: -20%;
+  width: 60px;
+}
+
+.coin:nth-child(6) {
+  left: 60%;
+  bottom: -20%;
+  width: 44px;
+}
+
+.coin:nth-child(7) {
+  left: 70%;
+  bottom: -20%;
+  width: 64px;
+}
+
+// Same six delay values, a sixth of the cycle apart, but shuffled rather
+// than assigned in left-to-right order — otherwise the coins read as one
+// sweeping wave instead of independent rises.
+@media (prefers-reduced-motion: no-preference) {
+  .coin {
+    animation: coinRise 7.5s ease-in-out infinite;
+  }
+
+  .coin:nth-child(2) {
+    animation-delay: 3.75s;
+  }
+
+  .coin:nth-child(4) {
+    animation-delay: 5s;
+  }
+
+  .coin:nth-child(5) {
+    animation-delay: 1.25s;
+  }
+
+  .coin:nth-child(6) {
+    animation-delay: 6.25s;
+  }
+
+  .coin:nth-child(7) {
+    animation-delay: 2.5s;
+  }
+}
+
+@keyframes coinRise {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0;
+  }
+
+  15% {
+    opacity: 0.85;
+  }
+
+  85% {
+    opacity: 0.85;
+  }
+
+  100% {
+    transform: translateY(-320px) rotate(18deg);
+    opacity: 0;
+  }
+}
+
+@include lg {
+  .row {
+    flex-direction: column;
+  }
+
+  .content {
+    max-width: none;
+  }
+
+  .visual {
+    flex: none;
+    width: 100%;
+    min-height: 260px;
+  }
+
+  .visualImage {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    transform: none;
+    height: auto;
+    width: 65%;
+    margin: 0 auto;
+    display: block;
+  }
+}
+
+@include md {
+  .heading {
+    font-size: 34px;
+  }
+
+  // The stacked image is much smaller here — the coins' scatter positions
+  // stop reading as "near the figure" and just look like clutter.
+  .coin {
+    display: none;
+  }
+}

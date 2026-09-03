@@ -11,8 +11,11 @@
   gap: $space-xxl * 1.2;
   margin: 0;
   padding-top: $space-xl;
-  border-radius: 0;
+  border-bottom-left-radius: $radius-card;
+  border-bottom-right-radius: $radius-card;
+  background-color: $color-grey-2;
   height:100vh;
+  isolation: isolate;
 
   // Ambient section glow, biased toward .visual rather than dead-center.
   // Forced to zero at y=0 via mask so it can't leave any seam against the navbar above.

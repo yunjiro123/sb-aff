@@ -1,0 +1,317 @@
+@use '../../styles/tokens' as *;
+@use '../../styles/mixins' as *;
+
+.faq {
+  position: relative;
+  overflow: hidden;
+  padding: $space-xl 0 $space-xxxl;
+  background-color: $color-black-1;
+}
+
+// ---- Header ----
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.eyebrow {
+  @include eyebrow;
+  display: block;
+}
+
+.heading {
+  @include section-heading;
+  margin-top: $space-sm;
+}
+
+// ---- Accordion ----
+
+// Positioning context for the decorative chat columns — they anchor to this
+// box's edges rather than the full-bleed section, so they sit right beside
+// the questions and stay centered as a group with them.
+.listWrap {
+  position: relative;
+  max-width: 850px;
+  margin: $space-xl auto 0;
+}
+
+.list {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $space-sm;
+}
+
+.item {
+  border-radius: $radius-card;
+  background-color: $color-grey-2;
+  box-shadow: 0 20px 30px rgba(2, 5, 14, 0.35);
+  overflow: hidden;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-m;
+  width: 100%;
+  padding: $space-m $space-lg;
+  text-align: left;
+}
+
+.question {
+  font-family: $font-display;
+  font-size: 19px;
+  font-weight: 800;
+  color: $color-white;
+}
+
+.iconWrap {
+  @include flex-center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: $gradient-blue;
+  color: $color-white;
+  transition: transform $duration-hover $ease-standard;
+
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.item[data-open='true'] .iconWrap {
+  transform: rotate(45deg);
+}
+
+// Height-animates via grid-template-rows (0fr -> 1fr) instead of a measured
+// max-height, so it needs no JS scrollHeight read and stays correct if the
+// answer copy ever reflows.
+.panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows $duration-hover $ease-standard;
+}
+
+.panelInner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.item[data-open='true'] .panel {
+  grid-template-rows: 1fr;
+}
+
+.answer {
+  padding: 0 $space-lg $space-m;
+  font-size: 16px;
+  line-height: 1.6;
+  color: $color-light-grey-1;
+}
+
+// ---- Decorative chat columns ----
+// Pure visual texture flanking the accordion — low opacity, non-interactive,
+// hidden once the viewport is too narrow to give them clear space outside
+// the centered content rail.
+
+.chatColumn {
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 306px;
+  display: flex;
+  flex-direction: column;
+  opacity: 0.4;
+  pointer-events: none;
+
+  @include xl {
+    display: none;
+  }
+}
+
+.chatColumn[data-side='left'] {
+  right: calc(100% + 40px);
+  align-items: flex-start;
+}
+
+.chatColumn[data-side='right'] {
+  left: calc(100% + 40px);
+  align-items: flex-start;
+}
+
+.bubble {
+  position: relative;
+  max-width: 279px;
+  margin-bottom: 47px;
+  padding: 16px 22px;
+  border-radius: 20px;
+  font-size: 15px;
+  line-height: 1.45;
+  color: $color-light-grey-1;
+}
+
+.bubble[data-variant='grey'] {
+  background: $color-grey-2;
+  border-bottom-left-radius: 4px;
+}
+
+.bubble[data-variant='purple'] {
+  background: $gradient-blue-reverse;
+  color: $color-white;
+  border-bottom-right-radius: 4px;
+}
+
+.bubble[data-variant='ghost'] {
+  display: flex;
+  align-items: center;
+  min-height: 54px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.typingDots {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.typingDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .typingDot {
+    animation: faqTypingPulse 1.2s ease-in-out infinite;
+  }
+
+  .typingDot:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+
+  .typingDot:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+}
+
+@keyframes faqTypingPulse {
+  0%,
+  60%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+.bubble[data-align='end'] {
+  align-self: flex-end;
+  border-bottom-right-radius: 18px;
+  border-bottom-left-radius: 4px;
+}
+
+.bubble[data-variant='purple'][data-align='end'] {
+  border-bottom-left-radius: 18px;
+  border-bottom-right-radius: 4px;
+}
+
+.bubbleDot {
+  position: absolute;
+  bottom: -27px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+}
+
+.bubble[data-align='start'] .bubbleDot {
+  left: 10px;
+}
+
+.bubble[data-align='end'] .bubbleDot {
+  right: 10px;
+}
+
+.bubble[data-variant='purple'] .bubbleDot {
+  background: $gradient-blue-reverse;
+  border-color: transparent;
+}
+
+// Bubbles loop through appear/hold/vanish on a shared cycle, each one
+// staggered a quarter of the way behind the last — so as one fades out the
+// next is already settled in, reading as an ongoing back-and-forth rather
+// than four static messages. Skipped entirely under reduced motion, where
+// the bubbles just sit at their resting, fully-visible state.
+@media (prefers-reduced-motion: no-preference) {
+  .bubble {
+    animation: faqChatCycle 12s ease-in-out infinite;
+    animation-fill-mode: backwards;
+  }
+
+  .chatColumn .bubble:nth-child(1) {
+    animation-delay: 0s;
+  }
+
+  .chatColumn .bubble:nth-child(2) {
+    animation-delay: 3s;
+  }
+
+  .chatColumn .bubble:nth-child(3) {
+    animation-delay: 6s;
+  }
+
+  .chatColumn .bubble:nth-child(4) {
+    animation-delay: 9s;
+  }
+}
+
+@keyframes faqChatCycle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  12%,
+  78% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  90% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@include md {
+  .heading {
+    font-size: 34px;
+  }
+
+  .trigger {
+    padding: $space-sm $space-m;
+  }
+
+  .question {
+    font-size: 16px;
+  }
+
+  .iconWrap {
+    width: 40px;
+    height: 40px;
+  }
+}

@@ -5,6 +5,8 @@ import Hero from '../Hero/Hero.jsx'
 import EcosystemAlt from '../EcosystemAlt/EcosystemAlt.jsx'
 import Geography from '../Geography/Geography.jsx'
 import Product from '../Product/Product.jsx'
+import Faq from '../Faq/Faq.jsx'
+import Contact from '../Contact/Contact.jsx'
 import styles from './App.module.scss'
 
 function App() {
@@ -23,6 +25,8 @@ function App() {
       <EcosystemAlt />
       <Geography />
       <Product />
+      <Faq />
+      <Contact />
     </div>
   )
 }

@@ -2,7 +2,7 @@ import Container from '../Container/Container.jsx'
 import Coins3D from './Coins3D.jsx'
 import useRevealAnimation from '../../hooks/useRevealAnimation.js'
 import useIdleMount from '../../hooks/useIdleMount.js'
-import heroWoman from '../../assets/hero-woman-purple.webp'
+import heroWoman from '../../assets/hero-woman-purple-2.webp'
 import styles from './Hero.module.scss'
 
 function ArrowIcon() {
