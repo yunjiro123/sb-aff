@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import logo from '../../assets/sb-partners.png'
-import heroWoman from '../../assets/hero-woman-purple.webp'
 import styles from './Loader.module.scss'
 
 // Deliberately only what the above-the-fold view needs. Everything below it
@@ -8,7 +7,7 @@ import styles from './Loader.module.scss'
 // the coin models — keeps loading lazily behind this and after it, exactly
 // as it does now. Gating on all of them would make the wait far worse than
 // the jank it's meant to hide.
-const ASSETS = [logo, heroWoman]
+const ASSETS = [logo]
 
 // On a warm cache the assets resolve in ~20ms, so in practice this constant
 // alone decides how long the loader is seen. Set above one full sweep of the

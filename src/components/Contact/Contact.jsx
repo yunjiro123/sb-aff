@@ -5,21 +5,14 @@ import avatar2 from '../../assets/avatar-2.webp'
 import avatar3 from '../../assets/avatar-3.webp'
 import purpleDress from '../../assets/contact-us.webp'
 import sbCoin from '../../assets/sb-coin.webp'
+import telegramIcon from '../../assets/telegram-icon.webp'
+import emailIcon from '../../assets/email-icon.webp'
 import styles from './Contact.module.scss'
 
 function PlusIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 5v14M5 12h14" />
-    </svg>
-  )
-}
-
-// Stand-in for Telegram/Email branding until real icons are supplied.
-function PlaceholderIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="7" />
     </svg>
   )
 }
@@ -31,8 +24,8 @@ const AVATARS = [
 ]
 
 const CONTACT_CARDS = [
-  { id: 'telegram', title: 'Telegram', value: 'Starzbetpartners' },
-  { id: 'email', title: 'Email', value: 'winwith@infernopartners.com' },
+  { id: 'telegram', icon: telegramIcon, title: 'Telegram', value: 'Starzbetpartners' },
+  { id: 'email', icon: emailIcon, title: 'Email', value: 'winwith@infernopartners.com' },
 ]
 
 // Purely decorative — "profit" motif rising past the figure. Ids just
@@ -80,11 +73,9 @@ function Contact() {
 
             <div className={styles.contactBlock} data-reveal>
               <div className={styles.contactCards}>
-                {CONTACT_CARDS.map(({ id, title, value }) => (
+                {CONTACT_CARDS.map(({ id, icon, title, value }) => (
                   <div key={id} className={styles.contactCard}>
-                    <span className={styles.contactIcon}>
-                      <PlaceholderIcon />
-                    </span>
+                    <img className={styles.contactIcon} src={icon} alt="" />
                     <span className={styles.contactDivider} />
                     <div className={styles.contactText}>
                       <span className={styles.contactTitle}>{title}</span>

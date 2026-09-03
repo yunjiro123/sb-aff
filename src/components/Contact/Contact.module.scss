@@ -160,19 +160,13 @@ $avatar-overlap: 26px;
   background: linear-gradient(180deg, #4891ff, #7949ff);
 }
 
+// Matches Product's .badgeIcon exactly: a plain image, no circle/background.
 .contactIcon {
-  @include flex-center;
+  display: block;
   flex-shrink: 0;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.18);
-  color: $color-white;
-
-  svg {
-    width: 22px;
-    height: 22px;
-  }
+  width: 65px;
+  height: 65px;
+  object-fit: contain;
 }
 
 .contactText {
@@ -220,7 +214,7 @@ $avatar-overlap: 26px;
   left: 50%;
   transform: translateX(-50%);
   height: auto;
-  width:95%;
+  width:100%;
   object-fit: contain;
   object-position: bottom;
   pointer-events: none;
