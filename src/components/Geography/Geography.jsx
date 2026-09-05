@@ -42,7 +42,7 @@ function Geography() {
   const [visualRef, shouldMountGlobe] = useDeferredMount('600px')
 
   return (
-    <section className={styles.geography}>
+    <section className={styles.geography} id="about-us">
       <Container>
         <div className={styles.card}>
           <div className={styles.visual} ref={visualRef}>

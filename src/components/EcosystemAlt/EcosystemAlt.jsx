@@ -387,7 +387,7 @@ function EcosystemAlt() {
   }
 
   return (
-    <section className={styles.ecosystem} ref={sectionRef}>
+    <section className={styles.ecosystem} id="features" ref={sectionRef}>
       <Container>
         <div ref={revealRef}>
           <span className={styles.sectionEyebrow} data-reveal>Ecosystem</span>

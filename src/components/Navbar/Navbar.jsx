@@ -1,8 +1,7 @@
 import Container from '../Container/Container.jsx'
+import NAV_LINKS from '../../data/navLinks.js'
 import logo from '../../assets/sb-partners.png'
 import styles from './Navbar.module.scss'
-
-const navLinks = ['Features', 'Product', 'FAQ', 'About Us', 'Contacts']
 
 function Navbar() {
   return (
@@ -12,9 +11,9 @@ function Navbar() {
           <img className={styles.logo} src={logo} alt="Starzbet Partners" />
 
           <ul className={styles.links}>
-            {navLinks.map((link) => (
-              <li key={link}>
-                <a href={`#${link.toLowerCase().replace(/\s+/g, '-')}`}>{link}</a>
+            {NAV_LINKS.map(({ label, href }) => (
+              <li key={label}>
+                <a href={href}>{label}</a>
               </li>
             ))}
           </ul>

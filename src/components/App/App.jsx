@@ -7,6 +7,7 @@ import Geography from '../Geography/Geography.jsx'
 import Product from '../Product/Product.jsx'
 import Faq from '../Faq/Faq.jsx'
 import Contact from '../Contact/Contact.jsx'
+import Footer from '../Footer/Footer.jsx'
 import styles from './App.module.scss'
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
       <Product />
       <Faq />
       <Contact />
+      <Footer />
     </div>
   )
 }
