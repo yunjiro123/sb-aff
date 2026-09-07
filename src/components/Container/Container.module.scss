@@ -1,8 +1,28 @@
 @use '../../styles/tokens' as *;
+@use '../../styles/mixins' as *;
 
 .container {
   width: 100%;
   max-width: $site-max-width;
   margin: 0 auto;
+  padding: 0 $space-xl;
   box-sizing: border-box;
+}
+
+@include lg {
+  .container { 
+    padding: 0 $space-lg; 
+  }
+}
+
+@include md {
+  .container { 
+    padding: 0 $space-m; 
+  }
+}
+
+@include sm {
+  .container { 
+    padding: 0 $space-sm; 
+  }
 }

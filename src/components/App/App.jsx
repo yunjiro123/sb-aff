@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react'
 import Loader from '../Loader/Loader.jsx'
 import Navbar from '../Navbar/Navbar.jsx'
 import Hero from '../Hero/Hero.jsx'
-import EcosystemAlt from '../EcosystemAlt/EcosystemAlt.jsx'
+import Ecosystem from '../Ecosystem/Ecosystem.jsx'
 import Geography from '../Geography/Geography.jsx'
 import Product from '../Product/Product.jsx'
 import Faq from '../Faq/Faq.jsx'
@@ -21,9 +21,9 @@ function App() {
   return (
     <div className={styles.app} aria-busy={!loaded}>
       <Loader onDone={handleLoaded} />
-      <Navbar />
+      {/* <Navbar /> */}
       <Hero revealArmed={loaded} />
-      <EcosystemAlt />
+      <Ecosystem />
       <Geography />
       <Product />
       <Faq />

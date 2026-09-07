@@ -3,7 +3,7 @@
 // by slugifying the label, which silently broke for "Contacts" since the
 // Contact section's id is singular).
 // Ordered to match the sections' actual top-to-bottom order on the page
-// (Hero -> EcosystemAlt -> Geography -> Product -> Faq -> Contact).
+// (Hero -> Ecosystem -> Geography -> Product -> Faq -> Contact).
 const NAV_LINKS = [
   { label: 'Features', href: '#features' },
   { label: 'About Us', href: '#about-us' },

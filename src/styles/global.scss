@@ -33,6 +33,18 @@ body {
 
 html {
   scroll-behavior: smooth;
+  // Safety net: a section that overflows (or hasn't been made responsive
+  // yet) shouldn't be able to widen the whole page — better a locally
+  // clipped/cramped section than a page-wide horizontal scrollbar.
+  //
+  // Deliberately only set here, not also on body: once html declares its
+  // own overflow, the UA stops propagating body's overflow to the viewport
+  // (per the CSS overflow spec) and body becomes its own separately
+  // scrollable box nested inside html's — plus overflow-x on either forces
+  // the other axis to compute as auto rather than visible. Together those
+  // produced two independent vertical scrollbars when this was set on both
+  // elements.
+  overflow-x: hidden;
 }
 
 @media (prefers-reduced-motion: reduce) {

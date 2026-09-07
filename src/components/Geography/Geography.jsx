@@ -46,7 +46,7 @@ function Geography() {
       <Container>
         <div className={styles.card}>
           <div className={styles.visual} ref={visualRef}>
-            {shouldMountGlobe && <Globe arcCount={5} />}
+            <div className={styles.visualInner}>{shouldMountGlobe && <Globe arcCount={5} />}</div>
           </div>
 
           <div className={styles.row}>

@@ -30,6 +30,12 @@
   }
 }
 
+@mixin xxl {
+  @media (max-width: $breakpoint-xxl) {
+    @content;
+  }
+}
+
 @mixin gradient-text($gradient: $gradient-blue) {
   background: $gradient;
   background-clip: text;
@@ -63,10 +69,19 @@
   }
 }
 
+
 @mixin eyebrow {
   font-size: $eyebrow-size;
   font-weight: 700;
   color: $color-orange-1;
+
+  @include md {
+    font-size: 18px;
+  }
+
+  @include sm {
+    font-size: 16px;
+  }
 }
 
 @mixin section-heading {
@@ -76,6 +91,38 @@
   line-height: 1.2;
   letter-spacing: -0.01em;
   color: $color-white;
+
+  @include xxl {
+    font-size: 53px;
+  }
+
+  @include xl {
+    font-size: 46px;
+  }
+
+  @include lg {
+    font-size: 42px;
+  }
+
+  @include md {
+    font-size: 33px;
+  }
+
+  // Bigger than md's, not a typo — this ladder is Ecosystem's own
+  // (moved here from its per-tier .heading overrides). Its card grid
+  // switches from a cramped 3-across row to a roomier 2-column layout at
+  // sm, so its heading can size back up there — a jump that only makes
+  // sense for a layout with that same switch. Other consumers of this
+  // mixin (Faq/Contact/Product/Geography) inherit the jump too since it's
+  // now the shared default; override .heading locally per component if a
+  // strictly-decreasing ladder is wanted instead.
+  @include sm {
+    font-size: 36px;
+  }
+
+  @include xs {
+    font-size: 28px;
+  }
 }
 
 @mixin section-sub {
@@ -83,4 +130,16 @@
   line-height: 1.6;
   color: $color-light-grey-1;
   margin-top: $space-m;
+
+  @include lg {
+    font-size: 18px;
+  }
+
+  @include md {
+    font-size: 17px;
+  }
+
+  @include sm {
+    font-size: 15px;
+  }
 }

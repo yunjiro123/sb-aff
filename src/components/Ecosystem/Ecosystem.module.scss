@@ -1,179 +1,590 @@
+@use 'sass:math';
 @use '../../styles/tokens' as *;
 @use '../../styles/mixins' as *;
 
+$card-width: 260px;
+$card-height: 364px;
+$card-reveal: 220px;
+$hand-height: 300px;
+
+$slot-width: 420px;
+$slot-height: 500px;
+
+$card-fly-height: $slot-height;
+$card-fly-width: math.div($card-width * $card-fly-height, $card-height);
+
+$card-overhang: 60px;
+$card-side-overhang: 40px;
+
 .ecosystem {
   position: relative;
-  padding: $space-xl * 1.2 0 $space-xxxl;
+  min-height: 100vh;
+  padding: $space-xxl 0 $space-xxl;
+  background-color: $color-black-1;
+}
+
+// Small colour label above the heading, matching Geography's. Named
+// .sectionEyebrow rather than .eyebrow — .eyebrow is already taken below by
+// the per-card numbered label (.eyebrow/.eyebrowNum/.eyebrowRule/.eyebrowLabel
+// inside .dealtBody), which is a different, unrelated element.
+.sectionEyebrow {
+  @include eyebrow;
+  display: block;
+  text-align: center;
+  margin: auto;
 }
 
 .heading {
-  font-family: $font-display;
-  font-size: 48px;
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: -0.01em;
+  @include section-heading;
   text-align: center;
-  color: $color-white;
-  margin: 0 0 $space-xxl;
-  text-transform: uppercase;
+  margin: 0 0;
 }
 
 .accent {
+  display: inline-block;
+  padding: 0 15px;
+  border-radius: 10px;
+  background: $gradient-blue;
+  color: $color-white;
+  line-height: 1;
+  text-transform: uppercase;
+
+}
+
+.hand {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: $hand-height;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.card {
+  position: absolute;
+  left: 50%;
+  --display-w: #{$card-width};
+  --display-h: #{$card-height};
+  width: $card-fly-width;
+  height: $card-fly-height;
+  bottom: calc(#{$card-reveal} - #{$card-height} / 2 - #{$card-fly-height} / 2);
+  margin-left: calc(#{$card-fly-width} / -2);
+  background-image: url('../../assets/card.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: $radius-button;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+  // These are the elements actually transformed every scroll frame (x/y/
+  // rotate/scale, see Ecosystem.jsx) — the hint belongs here rather than
+  // on .dealtCard, which only ever crossfades.
+  will-change: transform;
+}
+
+.slotGrid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-xxl;
+  margin-top: 10vh;
+}
+
+.slotRow {
+  display: flex;
+  justify-content: center;
+  gap: $space-xxl;
+}
+
+.slot {
+  position: relative;
+  width: $slot-width;
+  height: $slot-height;
+  border-radius: $radius-button;
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+}
+
+.dealtCard {
+  border-radius: $radius-button;
+  border: 6px solid rgba(255, 255, 255, 0.92);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  // No will-change here: these are only ever crossfaded via autoAlpha, never
+  // transformed, so hinting `transform` was permanently promoting five
+  // 420x500 elements to their own layers to optimize a property that never
+  // changes. The transform hint lives on .card, which does move.
+  will-change: opacity;
+
+  background-image: linear-gradient(to top, rgba(8, 10, 14, 0.88) 0%, rgba(8, 10, 14, 0.4) 45%, transparent 75%),
+    $gradient-blue;
+
+  &.hasImage {
+    background: $gradient-blue;
+  }
+}
+
+.dealtBody {
+  position: relative;
+  padding: $space-lg;
+}
+
+.cardAsset {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(-#{$card-overhang} 0 0 0 round $radius-button);
+  pointer-events: none;
+
+  &.sideOverhang {
+    clip-path: inset(-#{$card-overhang} -#{$card-side-overhang} 0 -#{$card-side-overhang} round $radius-button);
+  }
+}
+
+.cardAssetImg {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 140%;
+  height: auto;
+  // Previously carried filter: url('#ecosystemSharpen') to fake back edge
+  // contrast lost to upscaling. Dropped: these render at ~571 CSS px (140%
+  // of the card's ~408px interior) from 700-904px sources, so on a 1x
+  // display there is no upscale to correct at all, and on 2x it's only
+  // ~1.3-1.6x — not worth an feGaussianBlur+feComposite pass per paint on
+  // five images, which was the section's most expensive paint work.
+}
+
+.dealtScrim {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(to top, rgba(8, 9, 32, 1) 0%, rgba(8, 9, 32, 1) 30%, rgba(8, 9, 32, 0.90) 40%, transparent 65%);
+  pointer-events: none;
+}
+
+// Was three inset box-shadows with 48-56px blur radii — by far the most
+// expensive thing rasterized per card. Gradients reproduce the same
+// top-and-sides darkening at a fraction of the paint cost, since there's no
+// blur pass to run: each stop pair is doing the work the shadow's spread and
+// blur did, tuned to the same falloff distances and alphas.
+.dealtVignette {
+  position: absolute;
+  inset: 0;
+  border-radius: $radius-button;
+  background-image:
+    linear-gradient(to bottom, rgba(8, 10, 14, 0.8) 0%, rgba(8, 10, 14, 0.42) 8%, transparent 20%),
+    linear-gradient(to right, rgba(8, 10, 14, 0.55) 0%, rgba(8, 10, 14, 0.24) 5%, transparent 14%),
+    linear-gradient(to left, rgba(8, 10, 14, 0.55) 0%, rgba(8, 10, 14, 0.24) 5%, transparent 14%);
+  pointer-events: none;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.eyebrowNum {
+  font-family: $font-display;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+  color: $color-orange-1;
+}
+
+.eyebrowRule {
+  width: 1px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.eyebrowLabel {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.dealtTitle {
+  font-family: $font-display;
+  font-size: 37px;
+  font-weight: 900;
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+  color: $color-white;
+  margin: 0;
+}
+
+.titleAccent {
   @include gradient-text;
 }
 
-// Bento grid: tall card on the left spans both top rows, a wide card fills
-// the rest of row 1, two even cards split row 2 under it, and a full-width
-// band closes the section — matches the reference layout's proportions.
-.grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: 300px 300px 280px;
-  grid-template-areas:
-    'games stats stats'
-    'games ltv   apps'
-    'product product product';
-  gap: $space-sm;
+.dealtCopy {
+  font-size: 15px;
+  line-height: 1.45;
+  color: $color-light-grey-1;
+  margin: 10px 0 0;
 }
 
-%card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  padding: $space-lg;
-  border-radius: $radius-card;
-  overflow: hidden;
-  will-change: transform, opacity;
-}
+// xl/lg/md keep the desktop row layout (3-top/2-bottom, still animated via
+// the flying hand) — just scaled down, since the fixed 420x500px slots
+// + 64px gaps already overflow below ~1484px. Each block locally
+// redeclares the same dimension variables defined at the top of this file
+// (Sass scopes a `$var: value` re-declaration inside a block to that block,
+// so this can't leak into or drift from the base desktop values) and
+// re-derives $card-fly-width/height via the same formulas, so the flying
+// .card's native landed size stays exactly equal to the shrunk .slot's size
+// at every tier — required for the scroll-scrub animation's own math
+// (Ecosystem.jsx interpolates the flying card's scale up to 1 = its
+// native fly size as it lands, which only matches the target slot because
+// $card-fly-height is *defined* as $slot-height).
+@include xxl {
+  $card-width: 234px;
+  $card-height: 328px;
+  $card-reveal: 198px;
+  $hand-height: 270px;
+  $slot-width: 378px;
+  $slot-height: 450px;
+  $card-overhang: 54px;
+  $card-side-overhang: 36px;
+  $card-fly-height: $slot-height;
+  $card-fly-width: math.div($card-width * $card-fly-height, $card-height);
 
-%cardDark {
-  @extend %card;
-  background: $color-grey-2;
-}
+  .hand {
+    height: $hand-height;
+  }
 
-%cardGradient {
-  @extend %card;
-  background:
-    radial-gradient(120% 140% at 100% 0%, rgba(255, 255, 255, 0.16), transparent 55%),
-    $gradient-blue;
-}
+  .card {
+    --display-w: #{$card-width};
+    --display-h: #{$card-height};
+    width: $card-fly-width;
+    height: $card-fly-height;
+    bottom: calc(#{$card-reveal} - #{$card-height} / 2 - #{$card-fly-height} / 2);
+    margin-left: calc(#{$card-fly-width} / -2);
+  }
 
-.cardTitle {
-  font-family: $font-display;
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 1.25;
-  color: $color-white;
-  margin: 0 0 $space-xs;
-}
+  .slotGrid {
+    gap: 56px;
+  }
 
-.cardCopy {
-  font-size: 16px;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.8);
-  max-width: 46ch;
-}
+  .slotRow {
+    gap: $space-xl;
+  }
 
-// Neutral fill standing in for real screenshots/photography to be dropped
-// in later — kept as its own class so swapping to a real <img> is a
-// one-line change, no layout rework.
-.mediaPlaceholder {
-  flex: 1;
-  min-height: 0;
-  border-radius: $radius-button;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px dashed rgba(255, 255, 255, 0.18);
-}
+  .slot {
+    width: $slot-width;
+    height: $slot-height;
+  }
 
-.games {
-  @extend %cardDark;
-  grid-area: games;
-  gap: $space-m;
+  .dealtBody {
+    padding: 28px;
+  }
 
-  .mediaPlaceholder {
-    margin-bottom: $space-xs;
+  .eyebrowNum {
+    font-size: 18px;
+  }
+
+  .eyebrowLabel {
+    font-size: 12px;
+  }
+
+  .dealtTitle {
+    font-size: 33px;
+  }
+
+  .dealtCopy {
+    font-size: 14px;
   }
 }
 
-.stats {
-  @extend %cardGradient;
-  grid-area: stats;
-  flex-direction: row;
-  align-items: stretch;
-  gap: $space-lg;
-}
+@include xl {
+  $card-width: 208px;
+  $card-height: 291px;
+  $card-reveal: 176px;
+  $hand-height: 240px;
+  $slot-width: 336px;
+  $slot-height: 400px;
+  $card-overhang: 48px;
+  $card-side-overhang: 32px;
+  $card-fly-height: $slot-height;
+  $card-fly-width: math.div($card-width * $card-fly-height, $card-height);
 
-.statsBody {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-width: 0;
-}
+  .hand {
+    height: $hand-height;
+  }
 
-.stats .mediaPlaceholder {
-  flex: 1.1;
-  border-color: rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.1);
-}
+  .card {
+    --display-w: #{$card-width};
+    --display-h: #{$card-height};
+    width: $card-fly-width;
+    height: $card-fly-height;
+    bottom: calc(#{$card-reveal} - #{$card-height} / 2 - #{$card-fly-height} / 2);
+    margin-left: calc(#{$card-fly-width} / -2);
+  }
 
-.ltv {
-  @extend %cardDark;
-  grid-area: ltv;
-  gap: $space-m;
-}
+  .slotGrid {
+    gap: $space-xl;
+  }
 
-.apps {
-  @extend %cardGradient;
-  grid-area: apps;
-  gap: $space-m;
-  background:
-    radial-gradient(120% 140% at 100% 0%, rgba(255, 255, 255, 0.16), transparent 55%),
-    linear-gradient(94.89deg, #4891ff, color-mix(in srgb, #7949ff 70%, $color-violet-1 30%));
-}
+  .slotRow {
+    gap: $space-lg;
+  }
 
-.appIcons {
-  display: flex;
-  align-items: center;
-  gap: $space-sm;
-}
+  .slot {
+    width: $slot-width;
+    height: $slot-height;
+  }
 
-.appIcon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: $radius-button;
-  background: rgba(255, 255, 255, 0.16);
+  .dealtBody {
+    padding: $space-m;
+  }
 
-  svg {
-    width: 22px;
-    height: 22px;
-    color: $color-white;
+  .eyebrowNum {
+    font-size: 16px;
+  }
+
+  .eyebrowLabel {
+    font-size: 11px;
+  }
+
+  .dealtTitle {
+    font-size: 30px;
+  }
+
+  .dealtCopy {
+    font-size: 13px;
   }
 }
 
-.product {
-  @extend %cardGradient;
-  grid-area: product;
-  flex-direction: row;
-  align-items: stretch;
-  gap: $space-xl;
-  padding: $space-xl;
+@include lg {
+  $card-width: 182px;
+  $card-height: 255px;
+  $card-reveal: 154px;
+  $hand-height: 210px;
+  $slot-width: 294px;
+  $slot-height: 350px;
+  $card-overhang: 42px;
+  $card-side-overhang: 28px;
+  $card-fly-height: $slot-height;
+  $card-fly-width: math.div($card-width * $card-fly-height, $card-height);
+
+  .hand {
+    height: $hand-height;
+  }
+
+  .card {
+    --display-w: #{$card-width};
+    --display-h: #{$card-height};
+    width: $card-fly-width;
+    height: $card-fly-height;
+    bottom: calc(#{$card-reveal} - #{$card-height} / 2 - #{$card-fly-height} / 2);
+    margin-left: calc(#{$card-fly-width} / -2);
+  }
+
+  .slotGrid {
+    gap: $space-lg;
+  }
+
+  .slotRow {
+    gap: $space-m;
+  }
+
+  .slot {
+    width: $slot-width;
+    height: $slot-height;
+  }
+
+  .dealtBody {
+    padding: $space-sm;
+  }
+
+  .eyebrowNum {
+    font-size: 14px;
+  }
+
+  .eyebrowLabel {
+    font-size: 10px;
+  }
+
+  .dealtTitle {
+    font-size: 26px;
+  }
+
+  .dealtCopy {
+    font-size: 12px;
+  }
 }
 
-.productBody {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-width: 0;
+@include md {
+  .ecosystem {
+    padding: $space-lg 0;
+  }
+  // Slot width is capped by the row-of-3 layout itself, not a style choice:
+  // at md's tightest viewport (769px, 24px Container padding either side =
+  // 721px available), 3 slots + 2 gaps can't exceed ~235px per slot even
+  // with a minimal gap. 230px + an 8px gap is close to that ceiling
+  // (706px used, 15px slack) — as big as these cards get before the row
+  // itself would need to stop being 3-across (which is out of scope here;
+  // sm already switches to a grid for that reason).
+  $card-width: 142px;
+  $card-height: 199px;
+  $card-reveal: 121px;
+  $hand-height: 164px;
+  $slot-width: 230px;
+  $slot-height: 274px;
+  $card-overhang: 33px;
+  $card-side-overhang: 22px;
+  $card-fly-height: $slot-height;
+  $card-fly-width: math.div($card-width * $card-fly-height, $card-height);
+
+  .hand {
+    height: $hand-height;
+  }
+
+  .card {
+    --display-w: #{$card-width};
+    --display-h: #{$card-height};
+    width: $card-fly-width;
+    height: $card-fly-height;
+    bottom: calc(#{$card-reveal} - #{$card-height} / 2 - #{$card-fly-height} / 2);
+    margin-left: calc(#{$card-fly-width} / -2);
+  }
+
+  .slotGrid {
+    gap: $space-m;
+  }
+
+  .slotRow {
+    gap: $space-xs;
+  }
+
+  .slot {
+    width: $slot-width;
+    height: $slot-height;
+  }
+
+  .dealtBody {
+    padding: $space-sm;
+  }
+
+  .eyebrowNum {
+    font-size: 14px;
+  }
+
+  .eyebrowLabel {
+    font-size: 9px;
+  }
+
+  .dealtTitle {
+    font-size: 21px;
+  }
+
+  .dealtCopy {
+    font-size: 11px;
+  }
 }
 
-.product .mediaPlaceholder {
-  flex: 1;
-  max-width: 420px;
-  border-color: rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.1);
+// Below sm, cards fade up in place (Ecosystem.jsx's isCompact branch)
+// instead of flying from the fixed hand — these blocks retire the hand and
+// reflow the 3-top/2-bottom slot rows into a plain responsive grid.
+@include sm {
+  .ecosystem {
+    overflow-x: hidden;
+  }
+
+  // Belt-and-suspenders: guarantees the hand is gone even if isCompact's JS
+  // branch hasn't run yet. No conflict with GSAP's autoAlpha toggling —
+  // autoAlpha only ever writes inline visibility/opacity, never display,
+  // and display:none always wins since the element generates no box at all.
+  .hand {
+    display: none;
+  }
+
+  // Flattens the two flex .slotRow wrappers into one 2-col grid. The rows
+  // stay in the DOM (topRowRef/bottomRowRef are still needed by refs for
+  // the desktop-only scrub animation) but display:contents removes their
+  // own box from the layout tree, promoting their .slot children to direct
+  // grid items — so the 5 slots flow 0,1 / 2,3 / 4 in existing DOM order.
+  .slotGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: $space-m;
+    row-gap: $space-lg;
+    // 10vh gave the desktop scrub choreography room to work before the deal
+    // begins — irrelevant to a plain scroll-reveal, and vh is unstable on
+    // mobile Safari anyway as the dynamic toolbar resizes. Fixed token instead.
+    margin-top: $space-xl;
+  }
+
+  .slotRow {
+    display: contents;
+  }
+
+  .slot {
+    width: 100%;
+    height: auto;
+    // Matches the desktop 420:500 proportions so cards don't distort.
+    // .dealtCard is position:absolute;inset:0 inside .slot, so .slot still
+    // needs a real height — aspect-ratio supplies it without a hardcoded px.
+    aspect-ratio: math.div($slot-width, $slot-height);
+  }
+
+  .dealtBody {
+    padding: $space-m;
+  }
+
+  .eyebrowNum {
+    font-size: 17px;
+  }
+
+  .eyebrowLabel {
+    font-size: 11px;
+  }
+
+  .dealtTitle {
+    font-size: 28px;
+  }
+
+  .dealtCopy {
+    font-size: 14px;
+  }
+}
+
+@include xs {
+
+  .ecosystem {
+    padding: $space-m 0;
+  }
+
+  .slotGrid {
+    grid-template-columns: 1fr;
+    row-gap: $space-lg;
+    margin-top: $space-xl;
+  }
+
+  // .slot's width:100% + aspect-ratio (inherited from @include sm, still
+  // the base 420:500 ratio) fills the whole column at full phone width,
+  // which reads as oversized once there's only one card per row — capped
+  // and centered instead of letting it stretch edge to edge.
+  .slot {
+    max-width: 330px;
+    margin: 0 auto;
+  }
+
+  .dealtBody {
+    padding: $space-sm;
+  }
+
+  .dealtTitle {
+    font-size: 24px;
+  }
+
+  .dealtCopy {
+    font-size: 13.5px;
+  }
 }

@@ -256,3 +256,489 @@ $avatar-overlap: 26px;
     pointer-events: none;
   }
 }
+
+// Fills .visual exactly as the canvas used to fill it directly — kept as its
+// own element so @include sm below can turn .visual into a shorter clipping
+// box while .visualInner stays the true square the globe renders into.
+.visualInner {
+  width: 100%;
+  height: 100%;
+}
+
+// .visual is a fixed 1150px box, but .card's own width shrinks with the
+// viewport (via Container's own padding ladder) — left unchecked, the globe
+// stays full-size while the card around it narrows, until it fills the
+// entire card edge-to-edge and buries .content instead of just peeking in
+// from the left. Each block below locally redeclares $visual-size (Sass
+// scopes a $var: value re-declaration to the block it's in, same pattern as
+// Ecosystem.module.scss's xl/lg/md blocks) so the globe shrinks in step with
+// .card and stays roughly the same proportion of it at every tier as it is
+// on native desktop. top/left stay the same -4%/-25% at every tier — already
+// percentages of .card's own box, so the "how much bleeds off the left edge"
+// ratio holds without retuning.
+@include xl {
+  $visual-size: 900px;
+
+  .card {
+    padding: 40px;
+  }
+
+  .content {
+    max-width: 53%;
+  }
+
+  .visual {
+    // left/top both resolve as percentages of .card's own width/height, not
+    // .visual's — and .card's box shrinks faster (relative ratio) across
+    // these tiers than $visual-size does (card height especially, since
+    // every font-size/margin feeding it is shrinking too), so leaving
+    // either offset unchanged bleeds a growing share of the globe off-screen
+    // at each smaller tier instead of holding steady. Both retuned per tier
+    // to keep offset/visual-size close to desktop's own ~32%/~2% ratios.
+    top: 5%;
+    left: -24%;
+    width: $visual-size;
+    height: $visual-size;
+
+    &::before {
+      inset: -120px;
+    }
+  }
+
+  .heading {
+    margin-top: 14px;
+  }
+
+  // section-sub (the shared mixin .copy uses) only scales font-size at
+  // breakpoints, not margin-top — left flat at 24px otherwise, which would
+  // jump straight to sm's 16px with nothing in between.
+  .copy {
+    margin-top: 22px;
+  }
+
+  .statRow {
+    gap: 42px;
+    margin-top: 22px;
+  }
+
+  .statNum {
+    font-size: 65px;
+  }
+
+  .statLabel {
+    font-size: 16px;
+  }
+
+  .avatar {
+    width: 72px;
+    height: 72px;
+
+    &:not(:first-child) {
+      margin-left: -24px;
+    }
+  }
+
+  .divider {
+    margin-top: 30px;
+  }
+
+  .actions {
+    gap: 40px;
+    margin-top: 22px;
+  }
+
+  .actionsInfo {
+    font-size: 16px;
+  }
+
+  .cta {
+    font-size: 19px;
+    gap: 42px;
+    padding: 13px 13px 13px 30px;
+  }
+
+  .ctaArrow {
+    width: 42px;
+    height: 42px;
+
+    svg {
+      width: 19px;
+      height: 19px;
+    }
+  }
+}
+
+@include lg {
+  $visual-size: 760px;
+
+  .card {
+    padding: 30px;
+  }
+
+  .content {
+    max-width: 55%;
+  }
+
+  .visual {
+    top: 10%;
+    left: -23%;
+    width: $visual-size;
+    height: $visual-size;
+
+    &::before {
+      inset: -100px;
+    }
+  }
+
+  .heading {
+    margin-top: 12px;
+  }
+
+  .copy {
+    margin-top: 20px;
+  }
+
+  .statRow {
+    gap: 36px;
+    margin-top: 20px;
+  }
+
+  .statNum {
+    font-size: 58px;
+  }
+
+  .statLabel {
+    font-size: 15px;
+  }
+
+  .avatar {
+    width: 66px;
+    height: 66px;
+
+    &:not(:first-child) {
+      margin-left: -22px;
+    }
+  }
+
+  .divider {
+    margin-top: 28px;
+  }
+
+  .actions {
+    gap: 32px;
+    margin-top: 20px;
+  }
+
+  .actionsInfo {
+    font-size: 15px;
+  }
+
+  .cta {
+    font-size: 18px;
+    gap: 36px;
+    padding: 13px 13px 13px 28px;
+  }
+
+  .ctaArrow {
+    width: 40px;
+    height: 40px;
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+@include md {
+  $visual-size: 600px;
+
+  .card {
+    padding: 25px;
+  }
+
+
+  .visual {
+    top: 15%;
+    left: -30%;
+    width: $visual-size;
+    height: $visual-size;
+
+    &::before {
+      inset: -80px;
+    }
+  }
+
+  .heading {
+    margin-top: 10px;
+  }
+
+  .copy {
+    margin-top: 18px;
+  }
+
+  .statRow {
+    gap: 30px;
+    margin-top: 18px;
+  }
+
+  .statNum {
+    font-size: 51px;
+  }
+
+  .statLabel {
+    font-size: 14px;
+  }
+
+  .avatar {
+    width: 60px;
+    height: 60px;
+
+    &:not(:first-child) {
+      margin-left: -20px;
+    }
+  }
+
+  .divider {
+    margin-top: 26px;
+  }
+
+  .actions {
+    gap: 24px;
+    margin-top: 18px;
+  }
+
+  .actionsInfo {
+    font-size: 14px;
+  }
+
+  .cta {
+    font-size: 17px;
+    gap: 30px;
+    padding: 12px 12px 12px 26px;
+  }
+
+  .ctaArrow {
+    width: 38px;
+    height: 38px;
+
+    svg {
+      width: 17px;
+      height: 17px;
+    }
+  }
+}
+
+// .visual and .row are siblings under .card in that DOM order — order (not
+// column-reverse) puts .row first visually without depending on/disturbing
+// that order, and stays correct if a third sibling is ever added here.
+@include sm {
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    // Top/left/right scaled down from the desktop 48px alongside every
+    // other rhythm value below; bottom stays 0 — .visual is the last flex
+    // item, and .card's own bottom padding was sitting between the
+    // (already correctly half-clipped) globe and .card's actual bottom
+    // edge, so the crop read as a self-contained shape floating in empty
+    // space instead of a bleed. Zeroing just the bottom padding lets it sit
+    // flush against the real edge, so it reads as bleeding off the card
+    // like the desktop version.
+    padding: $space-lg $space-lg 0;
+  }
+
+  .row {
+    order: 1;
+    justify-content: flex-start;
+  }
+
+  .content {
+    width: 100%;
+    max-width: none;
+  }
+
+  // Every margin-top below is part of the same vertical rhythm chain
+  // (eyebrow -> heading -> copy -> statRow -> divider -> actions) — scaled
+  // down together so the stacked mobile layout doesn't keep desktop's
+  // wider spacing while everything inside it (text, cards, icons) shrinks.
+  .heading {
+    margin-top: $space-xs;
+  }
+
+  .copy {
+    margin-top: $space-sm;
+  }
+
+  // Switches from the desktop left-bleed to a bottom-bleed: .visual becomes
+  // a box exactly half as tall as it is wide (aspect-ratio 2/1) with
+  // overflow:hidden, while .visualInner — the actual square box the globe
+  // renders into — stays in normal flow at full (square) height. Since
+  // .visualInner's natural height exceeds .visual's own, its bottom half
+  // overflows and gets clipped, showing only the globe's top hemisphere —
+  // still a bleed, just off the bottom edge now that the layout is
+  // stacked, instead of off the left edge.
+  //
+  // position stays relative (not static) because it's still the nearest
+  // positioned ancestor other content might rely on; top/left reset since
+  // relative positioning would otherwise still apply the desktop bleed
+  // offsets as a shift.
+  .visual {
+    order: 2;
+    position: relative;
+    top: auto;
+    // Wider than the card itself (not capped at 100%) so it bleeds off the
+    // left/right edges too, clipped by .card's own overflow:hidden — still
+    // percentage-based, so it scales proportionally with .card at any
+    // viewport. Centered via left:50%+translateX rather than margin:auto —
+    // .card is a flex container, and flexbox's own cross-axis alignment for
+    // an oversized item doesn't reliably reproduce the "split negative
+    // space evenly" behavior plain margin:auto gets in normal block flow.
+    left: 50%;
+    transform: translateX(-50%);
+    width: 154%;
+    height: auto;
+    aspect-ratio: 2 / 1;
+    overflow: hidden;
+
+    // The base glow/shadow pseudo-elements were sized for the desktop
+    // left-bleed square — removed here rather than overridden, since
+    // .visual is no longer the square the globe actually renders into
+    // (.visualInner is, see below).
+    &::before,
+    &::after {
+      content: none;
+    }
+  }
+
+  .visualInner {
+    position: relative;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+
+    // Was -150px, tuned to the 1150px desktop globe. Scaled down; sits on
+    // the true square box now, so it bleeds off the same bottom edge as
+    // the globe itself rather than being clipped independently.
+    &::before {
+      content: '';
+      position: absolute;
+      inset: -40px;
+      z-index: -1;
+      background: radial-gradient(
+        closest-side,
+        rgba(121, 73, 255, 0.35),
+        rgba(72, 145, 255, 0.16) 45%,
+        transparent 76%
+      );
+      pointer-events: none;
+    }
+
+    // No ::after here — the desktop contact shadow anchors near the
+    // globe's bottom edge, which is exactly the half that's now bled off
+    // and hidden, so it has nothing left to ground.
+  }
+
+  .statRow {
+    flex-wrap: wrap;
+    gap: $space-m;
+    margin-top: $space-sm;
+  }
+
+  // align-self: stretch has nothing to stretch to once .statRow wraps onto
+  // multiple lines — collapses to a stray near-zero-height node otherwise.
+  .statDivider {
+    display: none;
+  }
+
+  .statNum {
+    font-size: 44px;
+  }
+
+  .statLabel {
+    font-size: 13px;
+  }
+
+  .divider {
+    margin-top: $space-m;
+  }
+
+  .actions {
+    flex-wrap: wrap;
+    gap: $space-sm;
+    margin-top: $space-sm;
+  }
+
+  .actionsInfo {
+    font-size: 14px;
+  }
+
+  .cta {
+    font-size: 16px;
+    gap: $space-m;
+    padding: 12px 12px 12px $space-m;
+  }
+
+  .ctaArrow {
+    width: 36px;
+    height: 36px;
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  // $avatar-size/$avatar-overlap are compile-time SCSS variables — can't be
+  // reassigned per breakpoint, so this overrides the compiled properties
+  // directly instead, leaving the variables themselves for the desktop rule.
+  .avatar {
+    width: 56px;
+    height: 56px;
+
+    &:not(:first-child) {
+      margin-left: -18px;
+    }
+  }
+}
+
+// One lighter step of @include sm's own treatment — not a redesign.
+// .visual's width:100% from @include sm above already carries through
+// unchanged here — still full card width, just a narrower card.
+@include xs {
+  .card {
+    padding: $space-m $space-m 0;
+  }
+
+  .copy {
+    margin-top: $space-xs;
+  }
+
+  .statRow {
+    margin-top: $space-xs;
+  }
+
+  .divider {
+    margin-top: $space-sm;
+  }
+
+  .actions {
+    margin-top: $space-xs;
+  }
+
+  .visualInner {
+    &::before {
+      inset: -24px;
+    }
+  }
+
+  .statNum {
+    font-size: 36px;
+  }
+
+  .cta {
+    font-size: 15px;
+    gap: $space-sm;
+    padding: 12px 10px 12px $space-sm;
+  }
+}

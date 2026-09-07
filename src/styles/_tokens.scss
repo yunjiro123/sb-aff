@@ -32,20 +32,9 @@ $hero-weight: 800;
 $hero-line-height: 1.2;
 $hero-letter-spacing: -0.02em;
 
-// Small colour label above a section heading (Geography, EcosystemAlt, …) —
+// Small colour label above a section heading (Geography, Ecosystem, …) —
 // one shared size so they stay in sync instead of each hardcoding its own.
 $eyebrow-size: 22px;
-
-// Site content width — sections span full width (edge-to-edge), but the
-// content inside each section is centered within this narrower rail.
-// Matches Wise's reference container width. See DESIGN.md.
-$site-max-width: 1600px;
-
-$breakpoint-xs: 640px;
-$breakpoint-sm: 768px;
-$breakpoint-md: 1024px;
-$breakpoint-lg: 1200px;
-$breakpoint-xl: 1440px;
 
 // Spacing (8px grid)
 $space-xs: 8px;
@@ -55,6 +44,21 @@ $space-lg: 32px;
 $space-xl: 48px;
 $space-xxl: 64px;
 $space-xxxl: 96px;
+
+// Site content width — sections span full width (edge-to-edge), but the
+// content inside each section is centered within this narrower rail.
+// Matches Wise's reference container width. See DESIGN.md.
+// Container carries its own horizontal padding ($space-xl each side on
+// large screens) — added on top here so the rail itself stays exactly
+// 1600px wide, same as before Container had any padding.
+$site-max-width: 1600px + ($space-xl * 2);
+
+$breakpoint-xs: 640px;
+$breakpoint-sm: 768px;
+$breakpoint-md: 1024px;
+$breakpoint-lg: 1200px;
+$breakpoint-xl: 1440px;
+$breakpoint-xxl: 1660px;
 
 // Shape
 $radius-card: 20px;

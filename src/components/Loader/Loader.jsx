@@ -3,7 +3,7 @@ import logo from '../../assets/sb-partners.png'
 import styles from './Loader.module.scss'
 
 // Deliberately only what the above-the-fold view needs. Everything below it
-// — the 3.1MB product video, EcosystemAlt's cards, the globe's dot field,
+// — the 3.1MB product video, Ecosystem's cards, the globe's dot field,
 // the coin models — keeps loading lazily behind this and after it, exactly
 // as it does now. Gating on all of them would make the wait far worse than
 // the jank it's meant to hide.

@@ -2,6 +2,7 @@
 @use '../../styles/mixins' as *;
 
 .hero {
+  --hero-visual-scale: 1;
   position: relative;
   overflow: hidden;
   display: flex;
@@ -53,13 +54,30 @@
   }
 }
 
-.visual {
+// Sizes to .visual's *scaled* footprint so the flex row reserves only the
+// shrunk amount of space — transform (below) doesn't affect layout size on
+// its own, so this wrapper is what actually makes the scale-down responsive
+// rather than just visually shrinking .visual inside an unchanged gap.
+.visualWrap {
   position: relative;
   z-index: 2;
   flex-shrink: 0;
+  width: calc(792px * var(--hero-visual-scale));
+  height: calc(690px * var(--hero-visual-scale));
+}
+
+.visual {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 792px;
-  // Matches .blob's height so .row/.hero size to contain it (.blob is absolute).
+  // Matches .blob's height (.blob is absolute). Scaled as a rigid unit via
+  // transform rather than resized, so every hardcoded coordinate inside it
+  // (blob clip-path, decor dot offsets, Coins3D's canvas offsets) stays
+  // correct at any --hero-visual-scale without touching Coins3D.jsx.
   height: 690px;
+  transform: scale(var(--hero-visual-scale));
+  transform-origin: top left;
 
   // Spotlight glow centered on the blob; inset controls spread since size is closest-side.
   // Top inset kept small (well under .hero's 154px top padding) so the glow's box
@@ -262,6 +280,7 @@
 .ctaRow {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: $space-lg * 1.2;
   margin-top: $space-xs * 1.2;
 }
@@ -311,6 +330,8 @@
 .statsGroup {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  row-gap: $space-m;
   gap: $space-lg * 1.2;
   margin-top: $space-m * 1.2;
 }
@@ -349,5 +370,389 @@
   font-size: 36px;
   font-weight: 700;
   color: $color-white;
+}
+
+// Every element below scales down together at each step — headline/subhead,
+// the CTA pill + Learn More link + its arrow icon, and the stats row — so
+// nothing is left at its full-size proportions while its neighbours shrink.
+//
+// .row itself only switches to a stacked column at @include sm — xxl/xl/lg/md
+// stay side-by-side (row's default), just increasingly scaled down, so the
+// visual keeps coexisting with the content column all the way to mobile.
+@include xxl {
+  .hero {
+    --hero-visual-scale: 0.9;
+  }
+
+  .content {
+    gap: 17px;
+  }
+
+  .headline {
+    font-size: 76px;
+  }
+
+  .subhead {
+    font-size: 21px;
+  }
+
+  .cta {
+    font-size: 18px;
+    padding: 17px 34px;
+  }
+
+  .learnMore {
+    font-size: 18px;
+  }
+
+  .arrow svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .ctaRow {
+    gap: $space-lg;
+  }
+
+  .statValue {
+    font-size: 32px;
+  }
+
+  .statLabel {
+    font-size: 14px;
+  }
+
+  .statsGroup {
+    gap: $space-lg;
+    margin-top: $space-m;
+  }
+
+  .contentDivider {
+    margin-top: $space-m;
+  }
+
+  .statItem:not(:first-child) {
+    padding-left: $space-xl;
+  }
+}
+
+@include xl {
+  .hero {
+    --hero-visual-scale: 0.78;
+  }
+
+  .content {
+    gap: 15px;
+  }
+
+  .headline {
+    font-size: 64px;
+  }
+
+  .subhead {
+    font-size: 19px;
+  }
+
+  .cta {
+    font-size: 16px;
+    padding: 15px 30px;
+  }
+
+  .learnMore {
+    font-size: 16px;
+  }
+
+  .arrow svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .ctaRow {
+    gap: $space-m;
+  }
+
+  .statValue {
+    font-size: 28px;
+  }
+
+  .statLabel {
+    font-size: 13px;
+  }
+
+  .statsGroup {
+    gap: $space-m;
+    margin-top: $space-sm;
+  }
+
+  .contentDivider {
+    margin-top: $space-m;
+  }
+
+  .statItem:not(:first-child) {
+    padding-left: $space-lg;
+  }
+}
+
+@include lg {
+  .hero {
+    --hero-visual-scale: 0.68;
+  }
+
+  .content {
+    gap: 13px;
+  }
+
+  .headline {
+    font-size: 50px;
+  }
+
+  .subhead {
+    font-size: 17px;
+  }
+
+  .cta {
+    font-size: 15px;
+    padding: 14px 28px;
+  }
+
+  .learnMore {
+    font-size: 15px;
+  }
+
+  .arrow svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .ctaRow {
+    gap: $space-sm;
+  }
+
+  .statValue {
+    font-size: 24px;
+  }
+
+  .statLabel {
+    font-size: 12px;
+  }
+
+  .statsGroup {
+    gap: $space-sm;
+    margin-top: $space-sm;
+  }
+
+  .contentDivider {
+    margin-top: $space-sm;
+  }
+
+  .statItem:not(:first-child) {
+    padding-left: $space-m;
+  }
+}
+
+@include md {
+  .hero {
+    --hero-visual-scale: 0.53;
+  }
+
+  .content {
+    gap: 11px;
+  }
+
+  .headline {
+    font-size: 38px;
+  }
+
+  .subhead {
+    font-size: 15px;
+  }
+
+  .cta {
+    font-size: 14px;
+    padding: 13px 26px;
+  }
+
+  .learnMore {
+    font-size: 14px;
+  }
+
+  .arrow svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .ctaRow {
+    gap: $space-sm;
+  }
+
+  .statValue {
+    font-size: 20px;
+  }
+
+  .statLabel {
+    font-size: 11px;
+  }
+
+  .statsGroup {
+    gap: $space-sm;
+    margin-top: $space-sm;
+  }
+
+  .contentDivider {
+    margin-top: $space-sm;
+  }
+
+  .statItem:not(:first-child) {
+    padding-left: $space-sm;
+  }
+}
+
+// First tier that actually stacks — the visual no longer competes with
+// .content for horizontal space, so scale/spacing can ease back up a bit
+// from .md's tighter row-layout values instead of continuing to shrink.
+@include sm {
+  .hero {
+    --hero-visual-scale: 0.55;
+    height: auto;
+    min-height: 100vh;
+    padding-bottom: $space-xl;
+  }
+
+  .row {
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: $space-xl;
+  }
+
+  .visualWrap {
+    margin-top: $space-lg;
+  }
+
+  // .row's align-items:center already centers .content as a box within the
+  // stacked column; these make everything inside that box centered too,
+  // rather than left-aligned text/rows sitting inside a centered box.
+  .content {
+    gap: 5px;
+    align-items: center;
+    text-align: center;
+  }
+
+  // The fixed 3-line break (from Hero.jsx's hardcoded <br />s) reads as
+  // cramped at the smaller sizes here — drop the forced breaks and let the
+  // headline wrap naturally to however many lines the width actually needs.
+  .headline br {
+    display: none;
+  }
+
+  // Constrains the now-unbroken headline/subhead to a balanced wrap width
+  // instead of stretching edge-to-edge in the centered, stacked column.
+  .headline {
+    font-size: 34px;
+    max-width: 460px;
+  }
+
+  .subhead {
+    font-size: 15px;
+    max-width: 380px;
+  }
+
+  .cta {
+    font-size: 15px;
+    padding: 14px 28px;
+  }
+
+  .learnMore {
+    font-size: 15px;
+  }
+
+  .arrow svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .ctaRow {
+    justify-content: center;
+    gap: $space-m;
+  }
+
+  .statValue {
+    font-size: 20px;
+  }
+
+  .statLabel {
+    font-size: 11px;
+  }
+
+  .statsGroup {
+    justify-content: center;
+    gap: $space-m;
+    margin-top: $space-sm;
+  }
+
+  .contentDivider {
+    margin-top: $space-sm;
+  }
+
+  .statItem:not(:first-child) {
+    padding-left: $space-lg;
+  }
+
+
+  .accent {
+    padding: 0 8px;
+  }
+}
+
+@include xs {
+  .hero {
+    --hero-visual-scale: 0.42;
+  }
+
+  .headline {
+    font-size: 28px;
+  }
+
+  .subhead {
+    font-size: 14px;
+  }
+
+  .ctaRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $space-sm;
+  }
+
+  .cta {
+    font-size: 14px;
+    padding: 13px 24px;
+  }
+
+  .learnMore {
+    font-size: 14px;
+  }
+
+  .arrow svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .statValue {
+    font-size: 18px;
+  }
+
+  .statLabel {
+    font-size: 10px;
+  }
+
+  // At ~0.42 scale the smallest decor dot in each corner cluster reads as
+  // visual noise — drop it, keep one accent per corner.
+  .decorTL2,
+  .decorBR3 {
+    display: none;
+  }
+
+   .accent {
+    padding: 0 5px;
+  }
 }
 
