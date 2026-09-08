@@ -70,36 +70,38 @@ function Product() {
     <section className={styles.product} id="product">
       <Container>
         <div className={styles.card}>
-          <div className={styles.visual}>
-            <div className={styles.laptop}>
-              <div className={styles.screen}>
-                <div className={styles.browserBar}>
-                  <img className={styles.browserLogo} src={logo} alt="" />
+          <div className={styles.visualWrap}>
+            <div className={styles.visual}>
+              <div className={styles.laptop}>
+                <div className={styles.screen}>
+                  <div className={styles.browserBar}>
+                    <img className={styles.browserLogo} src={logo} alt="" />
 
-                  <div className={styles.browserActions}>
-                    <span className={`${styles.browserBtn} ${styles.browserLogin}`}>Login</span>
-                    <span className={`${styles.browserBtn} ${styles.browserJoin}`}>Join Now</span>
-                    <span className={styles.browserIcon}>
-                      <ThemeIcon />
-                    </span>
-                    <span className={styles.browserIcon}>
-                      <MenuIcon />
-                    </span>
+                    <div className={styles.browserActions}>
+                      <span className={`${styles.browserBtn} ${styles.browserLogin}`}>Login</span>
+                      <span className={`${styles.browserBtn} ${styles.browserJoin}`}>Join Now</span>
+                      <span className={styles.browserIcon}>
+                        <ThemeIcon />
+                      </span>
+                      <span className={styles.browserIcon}>
+                        <MenuIcon />
+                      </span>
+                    </div>
                   </div>
+
+                  <video
+                    ref={videoRef}
+                    className={styles.screenVideo}
+                    src={gameVideo}
+                    loop
+                    muted
+                    playsInline
+                  />
                 </div>
 
-                <video
-                  ref={videoRef}
-                  className={styles.screenVideo}
-                  src={gameVideo}
-                  loop
-                  muted
-                  playsInline
-                />
+                <div className={styles.hinge} />
+                <div className={styles.base} />
               </div>
-
-              <div className={styles.hinge} />
-              <div className={styles.base} />
             </div>
           </div>
 

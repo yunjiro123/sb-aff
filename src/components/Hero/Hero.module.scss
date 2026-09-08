@@ -615,13 +615,14 @@
     --hero-visual-scale: 0.55;
     height: auto;
     min-height: 100vh;
+    padding-top: $space-xxl;
     padding-bottom: $space-xl;
   }
 
   .row {
     flex-direction: column;
     justify-content: flex-start;
-    gap: $space-xl;
+    gap: $space-m;
   }
 
   .visualWrap {

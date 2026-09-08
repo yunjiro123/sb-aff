@@ -18,7 +18,6 @@ $card-side-overhang: 40px;
 
 .ecosystem {
   position: relative;
-  min-height: 100vh;
   padding: $space-xxl 0 $space-xxl;
   background-color: $color-black-1;
 }
@@ -494,7 +493,11 @@ $card-side-overhang: 40px;
 // reflow the 3-top/2-bottom slot rows into a plain responsive grid.
 @include sm {
   .ecosystem {
-    overflow-x: hidden;
+    // Shorthand, not overflow-x alone: setting only one axis makes the
+    // other compute as auto per the CSS overflow spec (same landmine
+    // documented on html in global.scss), which was giving this section its
+    // own nested vertical scrollbar.
+    overflow: hidden;
   }
 
   // Belt-and-suspenders: guarantees the hand is gone even if isCompact's JS

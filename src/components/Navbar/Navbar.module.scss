@@ -1,15 +1,29 @@
 @use '../../styles/tokens' as *;
 @use '../../styles/mixins' as *;
 
-// No background of its own, blending into .hero. Absolute (anchored to
-// .app's position: relative) so it overlays the top of .hero instead of
-// pushing it down as an in-flow sibling.
+// No background of its own at the top of the page, blending into .hero.
+// Fixed to the viewport (rather than absolute/anchored to .app) so it stays
+// pinned while scrolling instead of scrolling away with .hero — slides out
+// on scroll-down and back in on scroll-up (data-hidden), and only picks up
+// a background once actually scrolled past .hero (data-scrolled), so it
+// stays legible over whatever section is currently behind it.
 .navbar {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 10;
+  transition: transform $duration-hover $ease-standard, background $duration-hover $ease-standard;
+
+  &[data-hidden='true'] {
+    transform: translateY(-100%);
+  }
+
+  &[data-scrolled='true'] {
+    background: rgba(19, 23, 28, 0.75);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
 }
 
 .inner {
@@ -23,6 +37,14 @@
 .logo {
   height: 50px;
   width: auto;
+
+  @include sm {
+    height: 40px;
+  }
+
+  @include xs {
+    height: 34px;
+  }
 }
 
 .links {
@@ -71,4 +93,142 @@
 
 .signup {
   background: $gradient-blue;
+}
+
+// ---- Mobile bar (login + hamburger) ----
+
+.mobileBar {
+  display: none;
+  align-items: center;
+  gap: $space-sm;
+
+  @include sm {
+    display: flex;
+  }
+}
+
+.hamburger {
+  // .mobileMenu is a positioned descendant of .navbar with its own z-index,
+  // which paints above .inner's unpositioned content (this button included)
+  // regardless of .navbar's own z-index — needs its own stacking position
+  // to stay above the panel once it's open.
+  position: relative;
+  z-index: 10;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+
+  span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: $color-white;
+    border-radius: 2px;
+    transition: transform $duration-hover $ease-standard, opacity $duration-hover $ease-standard;
+  }
+
+  &[data-open='true'] {
+    span:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+
+    span:nth-child(2) {
+      opacity: 0;
+    }
+
+    span:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+    }
+  }
+
+  @include sm {
+    display: flex;
+  }
+}
+
+// ---- Mobile menu panel ----
+// Fixed full-screen overlay, kept in the DOM/layout at all times below sm so
+// opacity/visibility can transition instead of popping with display: none.
+
+.mobileMenu {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $space-xl;
+  background: $color-black-1;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity $duration-hover $ease-standard, visibility $duration-hover $ease-standard;
+
+  @include sm {
+    display: flex;
+  }
+
+  &[data-open='true'] {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+}
+
+.mobileLinks {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-lg;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  a {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 22px;
+    font-weight: 600;
+
+    &:hover {
+      color: $color-white;
+    }
+  }
+}
+
+.mobileActions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: $space-sm;
+  width: 220px;
+
+  .button {
+    width: 100%;
+  }
+}
+
+@include sm {
+  .links,
+  .actions {
+    display: none;
+  }
+}
+
+@include xs {
+  .mobileMenu {
+    gap: $space-lg;
+  }
+
+  .mobileLinks a {
+    font-size: 19px;
+  }
 }

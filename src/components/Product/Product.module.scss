@@ -60,11 +60,30 @@
 
 // ---- Laptop mockup ----
 
+// No base rule for .visualWrap at all — it must stay position:static on
+// desktop (the default). .visual (position:absolute) resolves its bottom/
+// right percentages against the nearest POSITIONED ancestor, which needs to
+// stay .card there; a statically-positioned .visualWrap is transparent for
+// that lookup, so it skips straight past to .card. @include sm below gives
+// .visualWrap its own position:relative, turning it into the clipping box
+// that crops the bled laptop's top edge — scoped there only, since giving it
+// here would make .visualWrap itself (not .card) the containing block on
+// desktop too, breaking the bleed math against its own snug box instead of
+// .card's.
+
 // Oversized and bled off the card's bottom-right corner, the same treatment
 // as Geography's .visual (globe): absolutely positioned against .card
 // (behind .row's z-index: 1) at its natural size, then scaled up from that
 // bottom-right anchor so it grows toward the content instead of drifting
 // off both edges at once — .card's own overflow: hidden clips the bleed.
+//
+// scale(1.75) rather than a bigger width is what keeps the mockup's own
+// proportions here: .screenVideo carries a fixed 264px height at this tier,
+// so scaling the whole box as one rigid unit is the only way to grow it
+// without stretching the video against the browser-bar/hinge/base. @include
+// sm below takes the opposite approach — it makes .screenVideo fluid via
+// aspect-ratio, which lets the whole visual go percentage-width there with
+// no transform at all, matching Geography's own mobile treatment.
 .visual {
   position: absolute;
   z-index: 0;
@@ -195,7 +214,9 @@
   flex-direction: column;
   gap: $space-sm;
   width: 100%;
-  margin-top: $space-lg;
+  // Matches Geography's .statRow margin-top exactly, at every breakpoint —
+  // both are the same "space below the copy" role on the same shared card.
+  margin-top: $space-m;
 }
 
 .badge {
@@ -241,4 +262,325 @@
   line-height: 1.4;
   color: rgba(255, 255, 255, 0.8);
   margin: 0;
+}
+
+// xl/lg/md mirror Geography's own xl/lg/md sizing as closely as the two
+// sections' different bleed mechanisms allow — both .cards sit inside the
+// same shared Container, so both get an identical card-width-per-tier
+// ladder, which is what makes "uniform sizing" a real, checkable target
+// here rather than a vague aesthetic match. Geography itself has no
+// @include xxl, but this section gets one anyway (unlike Geography) —
+// visual-only, an intermediate step between desktop's 1.75 scale and xl's
+// 1.37, so the laptop doesn't jump straight from full desktop size to the
+// xl step across the 1441-1660px range. Nothing else (.card/.content/
+// .heading/.copy/.badge*) is touched at this tier — deliberately scoped to
+// just the visual, not a full ladder step like xl/lg/md below.
+@include xxl {
+  .visual {
+    transform: scale(1.56);
+  }
+}
+
+// .visual resizes via transform:scale (not width/height like Geography's
+// globe) because .screenVideo is still fixed-height at these tiers — the
+// scale ladder reuses Geography's own $visual-size shrink ratios
+// (900/760/600 against its 1150px base) applied to this section's 1.75
+// base multiplier, since both visuals bleed against the same shrinking
+// card and reusing the shrink rate keeps the two proportionally parallel.
+// right is retuned per tier the same way Geography retunes left (the
+// offset resolves against .card's own shrinking width, at a different
+// rate than the visual itself shrinks) — bottom has no equivalent formula
+// (resolves against .card's content-driven height, unlike Geography's
+// case) and is a conservative starting point, flagged to eyeball/adjust
+// in-browser same as Geography's own hand-tuned top/left.
+@include xl {
+  .card {
+    padding: 40px;
+  }
+
+  .content {
+    max-width: 49%;
+  }
+
+  .visual {
+    bottom: -1%;
+    right: -28%;
+    transform: scale(1.5);
+  }
+
+  .heading {
+    margin-top: 14px;
+  }
+
+  .copy {
+    margin-top: 22px;
+  }
+
+  .badgeRow {
+    gap: 14px;
+    margin-top: 22px;
+  }
+
+  .badge {
+    gap: 14px;
+  }
+
+  .badgeIcon {
+    width: 60px;
+    height: 60px;
+  }
+
+  .badgeTitle {
+    font-size: 19px;
+  }
+
+  .badgeCopy {
+    font-size: 15.5px;
+  }
+}
+
+@include lg {
+  .card {
+    padding: 30px;
+  }
+
+  .content {
+    max-width: 51%;
+  }
+
+  .visual {
+    bottom: -1%;
+    right: -30%;
+    transform: scale(1.3);
+  }
+
+  .heading {
+    margin-top: 12px;
+  }
+
+  .copy {
+    margin-top: 20px;
+  }
+
+  .badgeRow {
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .badge {
+    gap: 12px;
+  }
+
+  .badgeIcon {
+    width: 55px;
+    height: 55px;
+  }
+
+  .badgeTitle {
+    font-size: 18px;
+  }
+
+  .badgeCopy {
+    font-size: 14.8px;
+  }
+}
+
+@include md {
+  .card {
+    padding: 25px;
+  }
+
+  .content {
+    max-width: 46%;
+  }
+
+  .visual {
+    bottom: -2%;
+    right: -38%;
+    transform: scale(1.2);
+  }
+
+  .heading {
+    margin-top: 10px;
+  }
+
+  .copy {
+    margin-top: 18px;
+  }
+
+  .badgeRow {
+    gap: 11px;
+    margin-top: 18px;
+  }
+
+  .badge {
+    gap: 11px;
+  }
+
+  .badgeIcon {
+    width: 51px;
+    height: 51px;
+  }
+
+  .badgeTitle {
+    font-size: 17px;
+  }
+
+  .badgeCopy {
+    font-size: 14px;
+  }
+}
+
+// Content on top, visual on bottom — same stack order as Geography's own
+// content-top/globe-bottom sm treatment. .visual stays position:absolute
+// (still needs to bleed past .card's own edge, clipped by .card's
+// overflow:hidden) while .visualWrap becomes a self-contained clipping box
+// that crops it, and .card's padding is zeroed on the bleed side (bottom
+// here, matching Geography) so the crop sits flush against the real edge.
+//
+// Unlike Geography's globe (safe to crop in half and still read as "a
+// globe"), .screenVideo's fixed 264px height means .visual can only be
+// resized via transform:scale (see the base .visual rule).
+@include sm {
+
+  .product {
+    padding: $space-m 0;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    // Bottom zeroed (the bleed side, same as Geography's own sm) — the
+    // other three sides scaled down from the desktop 48px alongside
+    // everything else, matching Geography's own sm padding reduction.
+    padding: $space-lg $space-lg 0;
+  }
+
+  .row {
+    order: 1;
+  }
+
+  .content {
+    width: 100%;
+    max-width: none;
+  }
+
+  // Percentage-driven, exactly like Geography's own .visual/.visualInner
+  // pair at this breakpoint: the outer box takes a percentage of .card's
+  // width — the single knob to tune, and raising it past 100% bleeds off
+  // the side edges, clipped by .card's own overflow:hidden, the same way
+  // Geography's 154% does. Centred via left:50%+translateX rather than
+  // margin:auto for the same reason Geography does it: .card is a flex
+  // container, and flexbox doesn't reliably centre an oversized cross-axis
+  // item via auto margins.
+  //
+  // No fixed px and no transform:scale anywhere now. That workaround only
+  // ever existed because .screenVideo's hardcoded height blocked fluid
+  // sizing — fixed at its root below — and every attempt to compensate for
+  // it needed a hand-guessed crop value, which is what kept slicing the
+  // browser bar off.
+  .visualWrap {
+    order: 2;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    height: auto;
+    margin-top: $space-lg;
+  }
+
+  .visual {
+    position: static;
+    width: 100%;
+    // Load-bearing reset, not cleanup: the base rule's scale(1.75) survives
+    // into this breakpoint otherwise, and because transforms don't affect
+    // layout, .visualWrap only reserves space for the *unscaled* box — so a
+    // 175% laptop paints up-and-left out of it (transform-origin: bottom
+    // right) straight over the content above.
+    transform: none;
+  }
+
+  // The one thing that blocked Geography's percentage approach from working
+  // here: a hardcoded 264px height doesn't scale when the laptop's width
+  // does, so a percentage-width parent would stretch the mockup out of
+  // proportion. 596/264 is the video box's own design ratio (.visual at
+  // 620px, minus .screen's 2px borders and 10px paddings either side), so
+  // this renders identically at design size while staying proportional at
+  // any width.
+  .screenVideo {
+    height: auto;
+    aspect-ratio: 596 / 264;
+  }
+
+  .heading {
+    margin-top: $space-xs;
+  }
+
+  .copy {
+    // section-sub (the shared mixin .copy uses) only scales font-size at
+    // breakpoints, not margin-top — same gap Geography's .copy had.
+    margin-top: $space-sm;
+  }
+
+  .badgeRow {
+    gap: 10px;
+    margin-top: $space-sm;
+  }
+
+  .badge {
+    gap: 10px;
+  }
+
+  .badgeIcon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .badgeTitle {
+    font-size: 17px;
+  }
+
+  .badgeCopy {
+    font-size: 14px;
+  }
+}
+
+// One lighter step of @include sm's own treatment — not a redesign.
+@include xs {
+
+  .badge {
+    padding: 4px;
+    gap: $space-xs;
+  }
+  
+  .card {
+    padding: $space-m $space-m 0;
+  }
+
+  .copy {
+    margin-top: $space-xs;
+  }
+
+  .badgeRow {
+    margin-top: $space-xs;
+    gap: $space-xs;
+  }
+
+  .badgeIcon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .badgeTitle {
+    font-size: 16px;
+  }
+
+  .badgeCopy {
+    font-size: 13px;
+  }
+
+  .visualWrap{
+    margin-top: $space-sm;
+  }
 }

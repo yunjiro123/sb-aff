@@ -113,11 +113,6 @@ function Ecosystem() {
   // sync with $breakpoint-sm in src/styles/_tokens.scss — Sass tokens
   // aren't reachable from JS, hence the hardcode.
   const [isCompact] = useState(() => window.matchMedia('(max-width: 768px)').matches)
-  // Only wired up (via data-reveal, see renderSlot) when isCompact — a
-  // complete no-op otherwise, since useRevealAnimation does nothing when it
-  // finds zero [data-reveal] targets, so it can't fight the desktop scrub
-  // animation's own opacity writes on the same .dealtCard elements.
-  const cardsRevealRef = useRevealAnimation()
   const sectionRef = useRef(null)
   const handRef = useRef(null)
   const cardRefs = useRef([])
@@ -171,12 +166,11 @@ function Ecosystem() {
       if (isCompact) {
         // The hand's fixed 300px bottom strip and the fly-in choreography
         // both assume the desktop 3-top/2-bottom slot geometry — replaced
-        // outright here rather than adapted. Cards reveal instead via the
-        // second useRevealAnimation() call above (cardsRevealRef /
-        // data-reveal in renderSlot), which already has its own
-        // prefers-reduced-motion branch, so isCompact + reduced-motion
-        // together fall out of that for free (instant static reveal, no
-        // stagger) with no extra branching needed here.
+        // outright here rather than adapted. Cards reveal individually
+        // below instead, each on its own ScrollTrigger keyed to that card's
+        // own position — a single trigger on the shared grid would fire
+        // every card together as soon as the (two-row-tall) grid's top
+        // entered view, well before the bottom row was actually visible.
         //
         // Checked before `reduced` below, and deliberately not merged with
         // it: hiding the hand is about reclaiming mobile screen space, not
@@ -184,6 +178,26 @@ function Ecosystem() {
         // regardless of their motion setting — only non-compact widths fall
         // through to the reduced-motion branch's own (unchanged) behavior.
         gsap.set(handRef.current, { autoAlpha: 0 })
+
+        const compactReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        const cardTargets = dealtRefs.current.filter(Boolean)
+
+        if (compactReduced) {
+          gsap.set(cardTargets, { autoAlpha: 1, y: 0 })
+          return
+        }
+
+        gsap.set(cardTargets, { autoAlpha: 0, y: 28 })
+
+        cardTargets.forEach((el) => {
+          ScrollTrigger.create({
+            trigger: el,
+            start: 'top 85%',
+            once: true,
+            onEnter: () => gsap.to(el, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'power2.out' }),
+          })
+        })
+
         return
       }
 
@@ -398,7 +412,6 @@ function Ecosystem() {
         <div
           className={`${styles.dealtCard} ${asset ? styles.hasImage : ''}`}
           ref={(el) => (dealtRefs.current[slotIndex] = el)}
-          data-reveal={isCompact || undefined}
         >
           {asset && (
             <>
@@ -436,7 +449,7 @@ function Ecosystem() {
           </h2>
         </div>
 
-        <div className={styles.slotGrid} ref={cardsRevealRef}>
+        <div className={styles.slotGrid}>
           <div className={styles.slotRow} ref={topRowRef}>
             {TOP_SLOTS.map(renderSlot)}
           </div>

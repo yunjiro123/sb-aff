@@ -21,7 +21,7 @@ function App() {
   return (
     <div className={styles.app} aria-busy={!loaded}>
       <Loader onDone={handleLoaded} />
-      {/* <Navbar /> */}
+      <Navbar />
       <Hero revealArmed={loaded} />
       <Ecosystem />
       <Geography />

@@ -24,7 +24,6 @@
 
 .heading {
   @include section-heading;
-  margin-top: $space-sm;
 }
 
 // ---- Accordion ----
@@ -298,9 +297,6 @@
 }
 
 @include md {
-  .heading {
-    font-size: 34px;
-  }
 
   .trigger {
     padding: $space-sm $space-m;
@@ -313,5 +309,15 @@
   .iconWrap {
     width: 40px;
     height: 40px;
+  }
+}
+
+@include sm {
+  .faq {
+    padding: $space-m 0 $space-xl;
+  }
+
+  .listWrap {
+    margin: $space-lg auto 0;
   }
 }

@@ -533,6 +533,10 @@ $avatar-overlap: 26px;
 // column-reverse) puts .row first visually without depending on/disturbing
 // that order, and stays correct if a third sibling is ever added here.
 @include sm {
+  .geography {
+    padding: $space-m 0;
+  }
+
   .card {
     display: flex;
     flex-direction: column;

@@ -151,7 +151,6 @@ $avatar-overlap: 26px;
   gap: $space-sm;
   width: 100%;
   padding: $space-xs;
-  border-radius: $radius-button;
 }
 
 .contactDivider {
@@ -213,8 +212,8 @@ $avatar-overlap: 26px;
   bottom: -$space-xl;
   left: 50%;
   transform: translateX(-50%);
-  height: auto;
-  width:100%;
+  height: 110%;
+  width:auto;
   object-fit: contain;
   object-position: bottom;
   pointer-events: none;
@@ -315,24 +314,293 @@ $avatar-overlap: 26px;
   }
 
   100% {
-    transform: translateY(-320px) rotate(18deg);
+    transform: translateY(var(--coin-rise, -320px)) rotate(18deg);
     opacity: 0;
   }
 }
 
+// Spacing ladder below (padding/gap/margin only) is made uniform with
+// Geography's own xl/lg/md values: where a Contact property's base value
+// exactly matches a Geography property's base (same $space-* token, same
+// structural role), it gets Geography's ladder value-for-value — .contact
+// padding = .card padding (48->40/30/25), .row gap = .actions gap
+// (48->40/32/24), .heading/.contactBlock margin-top = .divider margin-top
+// (32->30/28/26), .cta margin-top = .copy/.statRow/.actions margin-top
+// (24->22/20/18). Properties with no Geography base-value twin (.cta's own
+// padding, .contactCards/.contactCard gap) get a comparable step-down
+// instead, sized to avoid 1px-style non-jumps.
+@include xl {
+  .contact {
+    padding: 40px 0;
+  }
+
+  .row {
+    gap: 40px;
+  }
+
+  .heading {
+    margin-top: 30px;
+  }
+
+  // Matches Geography's own .copy margin-top ladder exactly, value-for-
+  // value — both start from the same 24px section-sub mixin default.
+  .copy {
+    margin-top: 22px;
+  }
+
+  .cta {
+    margin-top: 22px;
+    padding: 15px 40px;
+  }
+
+  .contactBlock {
+    margin-top: 30px;
+  }
+
+  .contactCards {
+    gap: 14px;
+  }
+
+  .contactCard {
+    gap: 14px;
+    padding: 7px;
+  }
+
+  // Matches Product's .badgeIcon/.badgeTitle/.badgeCopy ladder exactly,
+  // value-for-value — both share the same 65px/20px/16.2px base.
+  .contactIcon {
+    width: 60px;
+    height: 60px;
+  }
+
+  .contactTitle {
+    font-size: 19px;
+  }
+
+  .contactValue {
+    font-size: 15.5px;
+  }
+
+  .visualImage {
+    height:105%;
+  }
+
+  // $avatar-size/$avatar-overlap are compile-time SCSS variables — can't be
+  // reassigned per breakpoint, so these override the compiled properties
+  // directly instead, matching Geography's own .avatar ladder value-for-
+  // value (same 78px/-26px base). .avatarPlus scales in lockstep since it's
+  // part of the same overlapping cluster.
+  .avatar {
+    width: 72px;
+    height: 72px;
+
+    &:not(:first-child) {
+      margin-left: -24px;
+    }
+  }
+
+  .avatarPlus {
+    width: 72px;
+    height: 72px;
+    margin-left: -24px;
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
+}
+
+// lg and md both stay row layout (like xl above) — only sm switches to the
+// stacked column, per the explicit "lg must still be row" requirement. Both
+// just keep tapering .visualImage's height percentage the way xl already
+// does; no flex-direction/width/min-height overrides belong here, those are
+// the stacked-mode shape and only apply from sm down.
 @include lg {
+  .row {
+    gap: 32px;
+  }
+
+  .visual{
+    flex: 0.7;
+  }
+
+  .visualImage {
+    height: 90%;
+  }
+
+  .contact {
+    padding: 30px 0;
+  }
+
+  .heading {
+    margin-top: 28px;
+  }
+
+  .copy {
+    margin-top: 20px;
+  }
+
+  .cta {
+    margin-top: 20px;
+    padding: 14px 36px;
+  }
+
+  .contactBlock {
+    margin-top: 28px;
+  }
+
+  .contactCards {
+    gap: 12px;
+  }
+
+  .contactCard {
+    gap: 12px;
+    padding: 6px;
+  }
+
+  .contactIcon {
+    width: 55px;
+    height: 55px;
+  }
+
+  .contactTitle {
+    font-size: 18px;
+  }
+
+  .contactValue {
+    font-size: 14.8px;
+  }
+
+  .avatar {
+    width: 66px;
+    height: 66px;
+
+    &:not(:first-child) {
+      margin-left: -22px;
+    }
+  }
+
+  .avatarPlus {
+    width: 66px;
+    height: 66px;
+    margin-left: -22px;
+
+    svg {
+      width: 22px;
+      height: 22px;
+    }
+  }
+}
+
+// Still row layout here too — md is the narrowest row tier, so
+// .visualImage's height keeps tapering (100% at lg -> 92% here) rather than
+// switching to the stacked width-based shape, which only starts at sm.
+@include md {
+  .contact {
+    padding: 25px 0;
+  }
+
+  .row {
+    gap: 24px;
+  }
+
+  .heading {
+    margin-top: 26px;
+  }
+
+  .copy {
+    margin-top: 18px;
+  }
+
+  .cta {
+    margin-top: 18px;
+    padding: 13px $space-lg;
+  }
+
+  .contactBlock {
+    margin-top: 26px;
+  }
+
+  .contactCards {
+    gap: 11px;
+  }
+
+  .contactCard {
+    gap: 11px;
+    padding: 6px;
+  }
+
+  .contactIcon {
+    width: 51px;
+    height: 51px;
+  }
+
+  .contactTitle {
+    font-size: 17px;
+  }
+
+  .contactValue {
+    font-size: 14px;
+  }
+
+  .visualImage {
+    height: 92%;
+  }
+
+  .avatar {
+    width: 60px;
+    height: 60px;
+
+    &:not(:first-child) {
+      margin-left: -20px;
+    }
+  }
+
+  .avatarPlus {
+    width: 60px;
+    height: 60px;
+    margin-left: -20px;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+// The stacking trigger — moved here from lg so the row layout persists
+// through lg/md as requested. Reuses the exact rules the old lg block had
+// for this (flex-direction:column, .content full-width, .visual/.visualImage
+// switching from the row's absolute-positioned/height-based sizing to
+// normal-flow/width-based). The image is much smaller once stacked, so the
+// coins' scatter positions stop reading as "near the figure" here too —
+// moved down from its old home in md, since that's no longer where stacking
+// starts.
+@include sm {
   .row {
     flex-direction: column;
   }
 
+  // .visual is first in the DOM (it's rendered before .content in
+  // Contact.jsx), so once stacked it would sit on top by default — order
+  // flips that without touching the markup, matching Product's own
+  // content-top/visual-bottom stacked layout.
   .content {
+    order: 1;
     max-width: none;
   }
 
+  .copy {
+    margin-top: $space-sm;
+  }
+
   .visual {
+    order: 2;
     flex: none;
     width: 100%;
     min-height: 260px;
+    margin-bottom:-$space-xxl;
   }
 
   .visualImage {
@@ -341,20 +609,139 @@ $avatar-overlap: 26px;
     left: auto;
     transform: none;
     height: auto;
-    width: 65%;
+    width: 70%;
     margin: 0 auto;
     display: block;
   }
-}
 
-@include md {
-  .heading {
-    font-size: 34px;
+  .contactCard {
+    padding: 5px;
   }
 
-  // The stacked image is much smaller here — the coins' scatter positions
-  // stop reading as "near the figure" and just look like clutter.
+  // Product's own .badgeTitle/.badgeCopy hold flat from md->sm too (17px/
+  // 14px both tiers) — matched here for the same reason.
+  .contactIcon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .contactTitle {
+    font-size: 17px;
+  }
+
+  .contactValue {
+    font-size: 14px;
+  }
+
+  // Geography's own .avatar ladder stops at sm (56px/-18px) — no further
+  // md->xs step exists there either, so nothing more is added at xs here.
+  .avatar {
+    width: 56px;
+    height: 56px;
+
+    &:not(:first-child) {
+      margin-left: -18px;
+    }
+  }
+
+  .avatarPlus {
+    width: 56px;
+    height: 56px;
+    margin-left: -18px;
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+
   .coin {
-    display: none;
+    --coin-rise: -250px;
+  }
+
+  .coin:nth-child(2) {
+    width: 47.6px;
+  }
+
+  .coin:nth-child(3) {
+    width: 57.8px;
+  }
+
+  .coin:nth-child(4) {
+    width: 40.8px;
+  }
+
+  .coin:nth-child(5) {
+    width: 51px;
+  }
+
+  .coin:nth-child(6) {
+    width: 37.4px;
+  }
+
+  .coin:nth-child(7) {
+    width: 54.4px;
+  }
+
+}
+
+@include xs {
+
+  .row{
+    gap: $space-xs;
+  }
+  .copy {
+    margin-top: $space-xs;
+  }
+
+  .contactIcon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .contactTitle {
+    font-size: 16px;
+  }
+
+  .contactValue {
+    font-size: 13px;
+  }
+
+  .visual {
+    min-height: 250px;
+  }
+
+  .visualImage {
+    width: 95%;
+  }
+
+  .coin {
+    --coin-rise: -200px;
+  }
+
+
+   .coin:nth-child(2) {
+    width: 32.4px;
+  }
+
+  .coin:nth-child(3) {
+    width: 39.3px;
+  }
+
+  .coin:nth-child(4) {
+    width: 27.8px;
+  }
+
+  .coin:nth-child(5) {
+    width: 34.7px;
+  }
+
+  .coin:nth-child(6) {
+    width: 25.4px;
+  }
+
+  .coin:nth-child(7) {
+    width: 37px;
   }
 }
