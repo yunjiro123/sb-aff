@@ -76,9 +76,6 @@ const CONTENT = [
     highlight: 'Payouts',
     copy: 'Get paid the way that works for you — multiple currencies and methods, with fast, reliable transfers.',
     asset: sbFourth,
-    // Two side-by-side phones read best wider than the card, so this one
-    // also bleeds past the left/right edges (see .cardAsset.sideOverhang).
-    sideOverhang: true,
   },
   {
     eyebrow: 'Worldwide',
@@ -405,7 +402,7 @@ function Ecosystem() {
 
   // Ref'd by slot index, which runs across both rows.
   const renderSlot = (slotIndex) => {
-    const { eyebrow, title, highlight, copy, asset, sideOverhang } = CONTENT[slotIndex]
+    const { eyebrow, title, highlight, copy, asset } = CONTENT[slotIndex]
 
     return (
       <div key={slotIndex} className={styles.slot} ref={(el) => (slotRefs.current[slotIndex] = el)}>
@@ -416,7 +413,7 @@ function Ecosystem() {
           {asset && (
             <>
               <div className={styles.dealtVignette} />
-              <div className={`${styles.cardAsset} ${sideOverhang ? styles.sideOverhang : ''}`}>
+              <div className={styles.cardAsset}>
                 <img className={styles.cardAssetImg} src={asset} alt="" />
               </div>
               <div className={styles.dealtScrim} />

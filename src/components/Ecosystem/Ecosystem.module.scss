@@ -14,7 +14,6 @@ $card-fly-height: $slot-height;
 $card-fly-width: math.div($card-width * $card-fly-height, $card-height);
 
 $card-overhang: 60px;
-$card-side-overhang: 40px;
 
 .ecosystem {
   position: relative;
@@ -136,10 +135,6 @@ $card-side-overhang: 40px;
   inset: 0;
   clip-path: inset(-#{$card-overhang} 0 0 0 round $radius-button);
   pointer-events: none;
-
-  &.sideOverhang {
-    clip-path: inset(-#{$card-overhang} -#{$card-side-overhang} 0 -#{$card-side-overhang} round $radius-button);
-  }
 }
 
 .cardAssetImg {
@@ -250,7 +245,6 @@ $card-side-overhang: 40px;
   $slot-width: 378px;
   $slot-height: 450px;
   $card-overhang: 54px;
-  $card-side-overhang: 36px;
   $card-fly-height: $slot-height;
   $card-fly-width: math.div($card-width * $card-fly-height, $card-height);
 
@@ -309,7 +303,6 @@ $card-side-overhang: 40px;
   $slot-width: 336px;
   $slot-height: 400px;
   $card-overhang: 48px;
-  $card-side-overhang: 32px;
   $card-fly-height: $slot-height;
   $card-fly-width: math.div($card-width * $card-fly-height, $card-height);
 
@@ -368,7 +361,6 @@ $card-side-overhang: 40px;
   $slot-width: 294px;
   $slot-height: 350px;
   $card-overhang: 42px;
-  $card-side-overhang: 28px;
   $card-fly-height: $slot-height;
   $card-fly-width: math.div($card-width * $card-fly-height, $card-height);
 
@@ -437,7 +429,6 @@ $card-side-overhang: 40px;
   $slot-width: 230px;
   $slot-height: 274px;
   $card-overhang: 33px;
-  $card-side-overhang: 22px;
   $card-fly-height: $slot-height;
   $card-fly-width: math.div($card-width * $card-fly-height, $card-height);
 
