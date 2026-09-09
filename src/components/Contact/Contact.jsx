@@ -25,7 +25,7 @@ const AVATARS = [
 
 const CONTACT_CARDS = [
   { id: 'telegram', icon: telegramIcon, title: 'Telegram', value: 'Starzbetpartners' },
-  { id: 'email', icon: emailIcon, title: 'Email', value: 'winwith@infernopartners.com' },
+  { id: 'email', icon: emailIcon, title: 'Email', value: 'marketing@starzbetglobal.com' },
 ]
 
 // Purely decorative — "profit" motif rising past the figure. Ids just

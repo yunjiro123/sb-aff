@@ -29,17 +29,18 @@ function Hero({ revealArmed = true }) {
   // so its GLTF loads + shader compiles don't fully overlap with the page's
   // own initial mount and the user's first scroll into Ecosystem.
   const showCoins = useIdleMount()
-  // Non-reactive, same convention as Ecosystem's isCompact check — 768 must
-  // stay in sync with $breakpoint-sm in src/styles/_tokens.scss, since Sass
-  // tokens aren't reachable from JS. The orbiting coins are too costly
-  // (two full-size WebGL canvases animating every frame) for mobile GPUs.
+  // Non-reactive, evaluated once at mount — same convention as Ecosystem.jsx's
+  // isCompact check. 768 must stay in sync with $breakpoint-sm in
+  // src/styles/_tokens.scss (Sass tokens aren't reachable from JS) and with
+  // Coins3D.jsx's own MOBILE_QUERY. Unmounted on mobile for now rather than
+  // just hidden, so mobile skips the GLTF loads entirely.
   const [isMobile] = useState(() => window.matchMedia('(max-width: 768px)').matches)
 
   return (
     <section className={styles.hero}>
       <Container>
-        <div className={styles.row}>
-          <div className={styles.content} ref={revealRef}>
+        <div className={styles.row} ref={revealRef}>
+          <div className={styles.content}>
             <h1 className={styles.headline} data-reveal>
               Make profit with
               <br />
@@ -76,7 +77,9 @@ function Hero({ revealArmed = true }) {
             </div>
           </div>
 
-          <div className={styles.visualWrap}>
+          {/* Reveal only kicks in on mobile — desktop's visual sits beside the
+              text and reads fine appearing immediately with it. */}
+          <div className={styles.visualWrap} {...(isMobile ? { 'data-reveal': true } : {})}>
             <div className={styles.visual}>
               <div className={styles.blob} />
 

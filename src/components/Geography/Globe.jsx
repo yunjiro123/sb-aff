@@ -32,13 +32,6 @@ const BODY_RADIUS = GLOBE_RADIUS * 0.995
 // this file.
 const DOT_PIXELS = 3.2
 
-// Mobile GPUs choke on the full ~11k dot shell plus arcCount arcs every
-// frame — keep only every Nth baked dot and fewer concurrent arcs there.
-// Dot size is bumped to compensate visually for the thinned field.
-const MOBILE_DOT_STRIDE = 2
-const MOBILE_DOT_PIXELS = DOT_PIXELS * 1.3
-const MOBILE_ARC_COUNT = 3
-
 // Lighting direction, in world space. The camera never moves, so this doubles
 // as the view-space direction and needs no per-frame transform. Up-and-left to
 // match the reference's lit face.
@@ -148,35 +141,37 @@ const toVec = (lng, lat) => {
 // for every visitor instead of once per page load in each of their browsers.
 // Format: [count: uint32][positions: count*3 float32][randoms: count float32],
 // all little-endian, matching Float32Array's native layout directly.
-async function loadDotPositions(url) {
+// stride > 1 thins the field by keeping every Nth dot, in place of rebaking a
+// second lower-density .bin file — used on mobile to cut the point count (and
+// the per-frame vertex shader + overdraw cost that scales with it). Sampling
+// by index rather than filtering on aRandom keeps that field's distribution
+// uniform for the kept dots; filtering on its own value would have biased it
+// toward whichever half of the range passed the cutoff, skewing the vertex
+// shader's brightness scatter (`mix(0.78, 1.14, aRandom)`) on mobile only.
+async function loadDotPositions(url, stride = 1) {
   const buffer = await fetch(url).then((res) => res.arrayBuffer())
   const count = new DataView(buffer).getUint32(0, true)
   const positions = new Float32Array(buffer, 4, count * 3)
   const randoms = new Float32Array(buffer, 4 + count * 3 * 4, count)
-  return { positions, randoms }
-}
+  if (stride <= 1) return { positions, randoms }
 
-// Keeps every `stride`-th baked dot (see MOBILE_DOT_STRIDE) rather than
-// shipping a second, coarser-baked file for mobile.
-function subsampleDots(positions, randoms, stride) {
-  const count = randoms.length
-  const kept = Math.ceil(count / stride)
-  const outPositions = new Float32Array(kept * 3)
-  const outRandoms = new Float32Array(kept)
-  for (let i = 0, j = 0; i < count; i += stride, j++) {
-    outPositions[j * 3] = positions[i * 3]
-    outPositions[j * 3 + 1] = positions[i * 3 + 1]
-    outPositions[j * 3 + 2] = positions[i * 3 + 2]
-    outRandoms[j] = randoms[i]
+  const keptCount = Math.ceil(count / stride)
+  const keptPositions = new Float32Array(keptCount * 3)
+  const keptRandoms = new Float32Array(keptCount)
+  for (let i = 0, kept = 0; i < count; i += stride, kept++) {
+    keptPositions[kept * 3] = positions[i * 3]
+    keptPositions[kept * 3 + 1] = positions[i * 3 + 1]
+    keptPositions[kept * 3 + 2] = positions[i * 3 + 2]
+    keptRandoms[kept] = randoms[i]
   }
-  return { positions: outPositions, randoms: outRandoms }
+  return { positions: keptPositions, randoms: keptRandoms }
 }
 
 // Point sprites are square by default in WebGL, which is exactly the dot shape
 // the reference uses — so nothing is discarded to a circle here. Colour comes
 // from a lambert term rather than a vertex attribute, letting the terminator
 // stay fixed in space while the globe turns underneath it.
-function createDotMaterial(pixelRatio, fields, arcCount, dotPixels) {
+function createDotMaterial(pixelRatio, fields, arcCount) {
   return new THREE.ShaderMaterial({
     transparent: true,
     // Dots sit on a shell around a depth-writing body, so they need to test
@@ -185,7 +180,7 @@ function createDotMaterial(pixelRatio, fields, arcCount, dotPixels) {
     depthWrite: false,
     uniforms: {
       uPixelRatio: { value: pixelRatio },
-      uDotPixels: { value: dotPixels },
+      uDotPixels: { value: DOT_PIXELS },
       uRefDist: { value: CAMERA_DISTANCE },
       uLightDir: { value: LIGHT_DIR.clone() },
       uBrightness: { value: DOT_BRIGHTNESS },
@@ -329,11 +324,23 @@ function createRingTexture() {
   return texture
 }
 
+// Matches Hero/Coins3D.jsx's MOBILE_QUERY and Geography.jsx's own isMobile
+// check — 768 must stay in sync with $breakpoint-sm in src/styles/_tokens.scss.
+const MOBILE_QUERY = '(max-width: 768px)'
+// Fewer segments on the two spheres (body + atmosphere rim) below this —
+// smooth-shaded with no sharp features, so the coarser facet count isn't
+// visible at mobile's smaller on-screen size, and it's the one geometry cost
+// here that scales with GPU tier rather than dot/arc count.
+const SPHERE_SEGMENTS_MOBILE = 32
+// Keeps 1 in 2 baked dots on mobile — see loadDotPositions.
+const MOBILE_DOT_STRIDE = 2
+
 function createRenderer(canvas, isMobile) {
-  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true })
-  // Matches Coins3D's mobile cap of 1 — the dot/arc passes cost more than
-  // this scene's fidelity is worth on a phone GPU at a higher ratio.
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1 : 1.5))
+  // Antialiasing is a full extra multisample resolve every frame; skipped on
+  // mobile GPUs where it's the more expensive of the two AA-adjacent knobs
+  // here (the other being pixel ratio, already capped below).
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: !isMobile })
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 0.7 : 1.5))
   renderer.setSize(CANVAS_SIZE, CANVAS_SIZE, false)
   return renderer
 }
@@ -354,10 +361,10 @@ function createCamera() {
 // longitude (not the screen) breaks the ring into brighter/dimmer sections
 // rather than a uniform band, and leans each bright section toward white —
 // the same "brighter reads whiter" coupling the particle field uses.
-function createAtmosphereRim() {
+function createAtmosphereRim(segments) {
   // 64x64 rather than 96x96 — both spheres are smooth-shaded with no sharp
   // features, so the extra segments aren't visible at this render size.
-  const geometry = new THREE.SphereGeometry(GLOBE_RADIUS * RIM_SCALE, 64, 64)
+  const geometry = new THREE.SphereGeometry(GLOBE_RADIUS * RIM_SCALE, segments, segments)
   const material = new THREE.ShaderMaterial({
     transparent: true,
     depthWrite: false,
@@ -451,13 +458,8 @@ function Globe({ facingLng = 50, arcCount = 5 }) {
     if (!canvas) return
 
     let cancelled = false
-    // Non-reactive, same convention as Ecosystem's isCompact / Hero's
-    // isMobile — 768 must stay in sync with $breakpoint-sm in
-    // src/styles/_tokens.scss, since Sass tokens aren't reachable from JS.
-    // Trims render cost on mobile GPUs (pixel ratio, dot count, arc count)
-    // while keeping spin/arcs/pulses/dot shading animating as normal.
-    const isMobile = window.matchMedia('(max-width: 768px)').matches
-    const activeArcCount = isMobile ? Math.min(MOBILE_ARC_COUNT, arcCount) : arcCount
+    const isMobile = window.matchMedia(MOBILE_QUERY).matches
+    const sphereSegments = isMobile ? SPHERE_SEGMENTS_MOBILE : 64
     const renderer = createRenderer(canvas, isMobile)
     const camera = createCamera()
     const scene = new THREE.Scene()
@@ -472,7 +474,10 @@ function Globe({ facingLng = 50, arcCount = 5 }) {
     tiltGroup.add(spinGroup)
     scene.add(tiltGroup)
 
-    const body = new THREE.Mesh(new THREE.SphereGeometry(BODY_RADIUS, 64, 64), createBodyMaterial())
+    const body = new THREE.Mesh(
+      new THREE.SphereGeometry(BODY_RADIUS, sphereSegments, sphereSegments),
+      createBodyMaterial(),
+    )
     spinGroup.add(body)
 
     // Fields sit inside the sphere, in the same local space as the dots, so
@@ -488,23 +493,18 @@ function Globe({ facingLng = 50, arcCount = 5 }) {
     // has loaded — a small fetch, not a blocking computation, so there's
     // nothing to gate the rest of setup on.
     const dotGeometry = new THREE.BufferGeometry()
-    const dotMaterial = createDotMaterial(pixelRatio, fields, activeArcCount, isMobile ? MOBILE_DOT_PIXELS : DOT_PIXELS)
+    const dotMaterial = createDotMaterial(pixelRatio, fields, arcCount)
     const dots = new THREE.Points(dotGeometry, dotMaterial)
     // The dot shell has no meaningful bounding sphere for the frustum culler to
     // work with mid-spin; it always fills the frame, so skip the test.
     dots.frustumCulled = false
     spinGroup.add(dots)
-    spinGroup.add(createAtmosphereRim())
+    spinGroup.add(createAtmosphereRim(sphereSegments))
 
-    loadDotPositions(dotsUrl).then(({ positions, randoms }) => {
+    loadDotPositions(dotsUrl, isMobile ? MOBILE_DOT_STRIDE : 1).then(({ positions, randoms }) => {
       if (cancelled) return
-      // Thin the baked field to every Nth dot on mobile rather than shipping
-      // a second baked file — cheap to do once here vs. every frame on the GPU.
-      const { positions: dotPositions, randoms: dotRandoms } = isMobile
-        ? subsampleDots(positions, randoms, MOBILE_DOT_STRIDE)
-        : { positions, randoms }
-      dotGeometry.setAttribute('position', new THREE.BufferAttribute(dotPositions, 3))
-      dotGeometry.setAttribute('aRandom', new THREE.BufferAttribute(dotRandoms, 1))
+      dotGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+      dotGeometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 1))
     })
 
     const cities = CITY_LNG_LAT.map(([lng, lat]) => toVec(lng, lat))
@@ -519,7 +519,7 @@ function Globe({ facingLng = 50, arcCount = 5 }) {
     // One pooled slot per concurrent arc, allocated up front — the flight data
     // is swapped in on spawn so nothing is created or disposed mid-animation.
     const slots = []
-    for (let i = 0; i < activeArcCount; i++) {
+    for (let i = 0; i < arcCount; i++) {
       const geometry = new LineGeometry()
       geometry.setPositions(new Float32Array((ARC_SEGMENTS + 1) * 3))
       const material = new LineMaterial({

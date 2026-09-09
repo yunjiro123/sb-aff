@@ -112,6 +112,12 @@
     radial-gradient(120% 120% at 25% 18%, rgba(255, 255, 255, 0.35), transparent 45%),
     $gradient-blue;
   filter: brightness(0.85) drop-shadow(0 24px 54px rgba(0, 0, 0, 0.35));
+  // drop-shadow's blur is the single most expensive paint in this section.
+  // Forces its own compositor layer so it isn't caught in the repaint when
+  // useRevealAnimation's GSAP tween writes opacity/transform on the sibling
+  // text every frame — without this it only stayed smooth by accident,
+  // riding on the layer promotion Coins3D's WebGL canvases forced nearby.
+  will-change: transform;
 }
 
 // Scattered accent circles/oblongs in the blob's top-left and bottom-right
@@ -629,6 +635,13 @@
     margin-top: $space-lg;
   }
 
+  // drop-shadow's blur is the priciest paint in the section (see .blob's
+  // will-change note) and the blob renders much smaller here anyway — cut it
+  // entirely instead of just isolating it to a layer.
+  .blob {
+    filter: none;
+  }
+
   // .row's align-items:center already centers .content as a box within the
   // stacked column; these make everything inside that box centered too,
   // rather than left-aligned text/rows sitting inside a centered box.
@@ -719,7 +732,7 @@
 
   .ctaRow {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     gap: $space-sm;
   }
 

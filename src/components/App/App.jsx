@@ -28,7 +28,7 @@ function App() {
       <Product />
       <Faq />
       <Contact />
-      <Footer />
+      <Footer /> 
     </div>
   )
 }

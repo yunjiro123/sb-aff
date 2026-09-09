@@ -59,10 +59,17 @@ const SELF_SPIN_SECONDS = 18
 const SELF_SPIN_RATE = (Math.PI * 2) / SELF_SPIN_SECONDS
 const TARGET_DIAMETER = 88
 // Evenly spaced delays around one lap (was a hardcoded 8-entry array stepping
-// by DURATION/8 = 3.25). COIN_COUNT is deliberately not a multiple of
-// MODELS.length (3) — see the COINS comment below for why that matters.
-const COIN_COUNT = 6
-const DELAYS = Array.from({ length: COIN_COUNT }, (_, i) => (-i * DURATION) / COIN_COUNT)
+// by DURATION/8 = 3.25). Coin count deliberately isn't a multiple of
+// MODELS.length (3), which is what keeps the finishes cycling around the ring
+// from reading as a repeat. Mobile still animates (see MOBILE_QUERY below)
+// but on weaker/smaller screens, so fewer coins there is pure savings with
+// little visual loss — desktop keeps the full ring.
+const COIN_COUNT_DESKTOP = 6
+const COIN_COUNT_MOBILE = 3
+function buildCoins(coinCount) {
+  const delays = Array.from({ length: coinCount }, (_, i) => (-i * DURATION) / coinCount)
+  return delays.map((delay, index) => ({ delay, model: index % MODELS.length }))
+}
 // The chip models are authored lying flat where the gold coin stands upright:
 // the chip's mesh is 1.899 x 0.336 x 1.899, so its thin axis (the face
 // normal) is Y, while the gold coin's is 1.899 x 1.898 x 0.361 — normal Z.
@@ -83,9 +90,10 @@ const MODELS = [
   { url: coinBlueGlbUrl, rotation: CHIP_ROTATION },
   { url: coinPurpleGlbUrl, rotation: CHIP_ROTATION },
 ]
-// Cycles the three finishes around the ring. COIN_COUNT over 3 models doesn't
-// divide evenly, which is what keeps the sequence from reading as a repeat.
-const COINS = DELAYS.map((delay, index) => ({ delay, model: index % MODELS.length }))
+// Matches Hero.module.scss's sm breakpoint — the first tier where .row
+// actually stacks. Below it the ring still orbits/self-spins, just with
+// fewer coins and a cheaper renderer (see COIN_COUNT_MOBILE, createRenderer).
+const MOBILE_QUERY = '(max-width: 768px)'
 
 // Brightness comes from two knobs because the models respond to different
 // things. The chips are metalness 0 — pure diffuse, so the lights below are
@@ -127,12 +135,20 @@ function createRig() {
   return { scene, mount: tilt }
 }
 
-function createRenderer(canvas) {
-  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true })
-  // Two full-size canvases render every frame here, so pixel ratio costs
-  // double what it does in a single-canvas scene — capped at 1 (matching
-  // Globe) to keep that within budget.
-  renderer.setPixelRatio(1)
+// 0.6 sits just above --hero-visual-scale's mobile range (0.55 at the sm
+// breakpoint down to 0.42 at xs, in Hero.module.scss) — the coins never
+// render sharper than they're actually displayed, but never softer than the
+// largest mobile size either. Antialias is skipped outright on mobile,
+// matching Globe.jsx's isMobile renderer split — it's the pricier of the two
+// AA-adjacent knobs here, and both run every frame since mobile animates too.
+const MOBILE_PIXEL_RATIO = 0.6
+
+function createRenderer(canvas, isMobile) {
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: !isMobile })
+  // Two full-size canvases render every frame on desktop, so pixel ratio
+  // costs double what it does in a single-canvas scene — capped at 1
+  // (matching Globe) to keep that within budget.
+  renderer.setPixelRatio(isMobile ? MOBILE_PIXEL_RATIO : 1)
   renderer.setSize(CANVAS_WIDTH, CANVAS_HEIGHT, false)
   return renderer
 }
@@ -213,10 +229,12 @@ function Coins3D() {
     if (!backCanvas || !frontCanvas) return
 
     let cancelled = false
+    const isMobile = window.matchMedia(MOBILE_QUERY).matches
+    const coins = buildCoins(isMobile ? COIN_COUNT_MOBILE : COIN_COUNT_DESKTOP)
     const back = createRig()
     const front = createRig()
-    const backRenderer = createRenderer(backCanvas)
-    const frontRenderer = createRenderer(frontCanvas)
+    const backRenderer = createRenderer(backCanvas, isMobile)
+    const frontRenderer = createRenderer(frontCanvas, isMobile)
     const camera = createCamera()
 
     // One bake per renderer, not one shared between them: a PMREM texture is
@@ -258,7 +276,7 @@ function Coins3D() {
         (gltf) => {
           if (cancelled) return
           const template = buildTemplate(gltf, rotation)
-          COINS.filter((coin) => coin.model === modelIndex).forEach((coin) => addCoin(template, coin.delay))
+          coins.filter((coin) => coin.model === modelIndex).forEach((coin) => addCoin(template, coin.delay))
         },
         undefined,
         (error) => console.error(`Failed to load coin model ${url}`, error),
@@ -268,7 +286,7 @@ function Coins3D() {
     const startTime = performance.now()
     let frameId = null
 
-    function animate() {
+    const animate = () => {
       frameId = requestAnimationFrame(animate)
       const t = (performance.now() - startTime) / 1000
 

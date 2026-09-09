@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import Container from '../Container/Container.jsx'
 import Globe from './Globe.jsx'
 import useRevealAnimation from '../../hooks/useRevealAnimation.js'
@@ -40,13 +41,18 @@ function Geography() {
   // scripts/build-globe-dots.mjs.) rootMargin starts it a little before it's
   // actually in view, so there's no pop-in when the user scrolls down to it.
   const [visualRef, shouldMountGlobe] = useDeferredMount('600px')
+  // Non-reactive, same convention as Hero.jsx/Ecosystem.jsx — 768 must stay
+  // in sync with $breakpoint-sm in src/styles/_tokens.scss. Fewer concurrent
+  // arcs on mobile: each one drives a Line2 geometry rebuild every frame
+  // it's in flight, on top of the dot shell's own per-frame shader work.
+  const [isMobile] = useState(() => window.matchMedia('(max-width: 768px)').matches)
 
   return (
     <section className={styles.geography} id="about-us">
       <Container>
         <div className={styles.card}>
           <div className={styles.visual} ref={visualRef}>
-            <div className={styles.visualInner}>{shouldMountGlobe && <Globe arcCount={5} />}</div>
+            <div className={styles.visualInner}>{shouldMountGlobe && <Globe arcCount={isMobile ? 3 : 5} />}</div>
           </div>
 
           <div className={styles.row}>
