@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import Container from '../Container/Container.jsx'
 import Coins3D from './Coins3D.jsx'
 import useRevealAnimation from '../../hooks/useRevealAnimation.js'
@@ -28,6 +29,11 @@ function Hero({ revealArmed = true }) {
   // so its GLTF loads + shader compiles don't fully overlap with the page's
   // own initial mount and the user's first scroll into Ecosystem.
   const showCoins = useIdleMount()
+  // Non-reactive, same convention as Ecosystem's isCompact check — 768 must
+  // stay in sync with $breakpoint-sm in src/styles/_tokens.scss, since Sass
+  // tokens aren't reachable from JS. The orbiting coins are too costly
+  // (two full-size WebGL canvases animating every frame) for mobile GPUs.
+  const [isMobile] = useState(() => window.matchMedia('(max-width: 768px)').matches)
 
   return (
     <section className={styles.hero}>
@@ -80,7 +86,7 @@ function Hero({ revealArmed = true }) {
               <div className={styles.decorBR2} />
               <div className={styles.decorBR3} />
 
-              {showCoins && <Coins3D />}
+              {showCoins && !isMobile && <Coins3D />}
 
               <div className={styles.imageOverhang}>
                 <img className={styles.heroImg} src={heroWoman} alt="" />
